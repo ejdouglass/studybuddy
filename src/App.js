@@ -46,6 +46,9 @@ const App = () => {
         <div className='app-body'>
           <Route exact path='/' component={LandingComponent} />
           <Route exact path='/modify_card' component={ModifyCardComponent} />
+          <Route exact path='/modify_deck' component={ModifyDeckComponent} />
+          <Route exact path='/view_cards' component={ViewCardsComponent} />
+          <Route exact path='/view_decks' component={ViewDecksComponent} />
         </div>
       </Router>
     </Store>
@@ -58,8 +61,18 @@ const Header = () => {
 
   return (
     <div className='app-header' style={{display: 'flex', flexDirection: 'column'}}>
-      <h1>Craft Ye The Finest Studying Materials, {state.username}.</h1>
-      <p>You currently have {state.cards.length} cards in your box.</p>
+      <div style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
+        <h1>Craft Ye The Finest Studying Materials, {state.username}.</h1>
+        <p>You currently have {state.cards.length} cards in your box.</p>
+      </div>
+
+      <div style={{display: 'flex', flexDirection: 'row'}}>
+        <button className='btn' onClick={() => history.push('/')}>Home</button>
+        <button className='btn' onClick={() => history.push('/view_cards')}>My Cards</button>
+        <button className='btn' onClick={() => history.push('/view_decks')}>My Decks</button>        
+        <button className='btn' onClick={() => history.push('/modify_card')}>Card+</button>
+        <button className='btn' onClick={() => history.push('/modify_deck')}>Deck+</button>
+      </div>
     </div>
   )
 }
@@ -69,7 +82,10 @@ const LandingComponent = () => {
   const history = useHistory();
 
   return (
-    <div style={{display: 'flex'}}>
+    <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+      <h1>Hiya! This is the Landing Page. Nothing much going on here yet. Under Construction, I suppose!</h1>
+      <h2>You currently have {state.cards.length} cards in your box.</h2>
+      <h2>You've made {state.decks.length} decks out of these.</h2>
       <button className='btn' onClick={() => history.push('/modify_card')} >Make a New Card</button>
     </div>
   )
@@ -77,7 +93,7 @@ const LandingComponent = () => {
 
 const ModifyCardComponent = () => {
   const [state, dispatch] = useContext(Context);
-  // Change to SINGLE useState object so that you can have a useEffect looking at a single variable to update user's WHAT IS DO
+  // ADD: 'difficulty' marker
   const [card, setCard] = useState({
     id: undefined,
     type: '', // Thinking maybe can add optional 'type' like question, definition, etc. which could later be filtered for as well
@@ -91,14 +107,7 @@ const ModifyCardComponent = () => {
 
 
   function createNewCard() {
-
     let creationFeedback = '';
-
-    // Check if everything is okay, and if so -> create new card in global state (add to reducer, not there yet)
-    // Default behavior is to zero out the page and let user know new card exists; separate button for 'Done, navigate away to whatever'
-
-    // ADD: id, creationTime
-
 
     if (!card.categories.length) {
       creationFeedback += `Please enter at least one category for this card, so you can search and sort for it later. `;
@@ -175,6 +184,39 @@ const ModifyCardComponent = () => {
 
       <button className='btn' onClick={createNewCard}>Create</button>
 
+    </div>
+  )
+}
+
+
+const ModifyDeckComponent = () => {
+  const [state, dispatch] = useContext(Context);
+
+  return (
+    <div>
+      <h1>Make or modify a deck of cards here!</h1>
+    </div>
+  )
+}
+
+
+const ViewCardsComponent = () => {
+  const [state, dispatch] = useContext(Context);
+
+  return (
+    <div>
+      <h1>View your cards here!</h1>
+    </div>
+  )
+}
+
+
+const ViewDecksComponent = () => {
+  const [state, dispatch] = useContext(Context);
+
+  return (
+    <div>
+      <h1>View your decks here!</h1>
     </div>
   )
 }
