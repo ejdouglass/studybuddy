@@ -2,13 +2,23 @@ import React, { createContext, useContext, useReducer, useState, useEffect } fro
 import { BrowserRouter as Router, Route, useHistory } from 'react-router-dom';
 import './App.css';
 
+function save(state) {
+  window.localStorage.setItem('studyBuddyData', JSON.stringify(state));
+}
+
+function load() {
+  return JSON.parse(window.localStorage.getItem('studyBuddyData'));
+}
+
 function rando(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 const actions = {
   ADD_NEW_CARD: 'add_new_card',
-  ADD_NEW_DECK: 'add_new_deck'
+  ADD_NEW_DECK: 'add_new_deck',
+  UPDATE_WHATDO: 'update_whatdo',
+  LOAD_SAVED_DATA: 'load_saved_data'
 };
 
 const Reducer = (state, action) => {
@@ -19,6 +29,12 @@ const Reducer = (state, action) => {
     case actions.ADD_NEW_DECK:
       let newDeckPile = [...state.decks, action.payload];
       return {...state, decks: newDeckPile};
+    case actions.UPDATE_WHATDO:
+      // We'll test it out, but we're expecting a payload object with page URL and currentAction object, if applicable
+      return {...state, whatdo: action.payload};
+    case actions.LOAD_SAVED_DATA:
+      // Receives the entirety of previously saved state as payload, so... set state to that, I guess? Might ... it if that doesn't work well.
+      return action.payload;
     default:
       return state;
   }
@@ -26,6 +42,10 @@ const Reducer = (state, action) => {
 
 const initialState = {
   username: 'Card-Seeker',
+  whatdo: {
+    page: '?',
+    currentAction: {}
+  },
   cards: [],
   decks: []
 }
@@ -62,6 +82,12 @@ const App = () => {
 const Header = () => {
   const [state, dispatch] = useContext(Context);
   const history = useHistory();
+
+  useEffect(() => {
+    // Ooh, fun. This fires whenever the app is refreshed, so we can use this to LOAD, I think.
+    const loadedData = load();
+    dispatch({type: actions.LOAD_SAVED_DATA, payload: loadedData})
+  }, []);
 
   return (
     <div className='app-header' style={{display: 'flex', flexDirection: 'column'}}>
@@ -125,8 +151,7 @@ const ModifyCardComponent = () => {
       console.log(`I should be sharing the error: ${creationFeedback}`)
       return;
     } else {
-      // We're good to go -- create the card, update feedback, update app state with the new card, and reset this page's local card state
-      // HERE: Declare a creationTime (to help make an ID), and then declare an ID, then make a new obj that'll be the payload
+      // ADD: Logic for when the ID already exists so we don't give an old card a new ID. I mean, that'd be fine, but unnecessary.
       let creationTime = new Date();
       let monthID = (creationTime.getMonth() + 1).toString();
       if (parseInt(monthID) < 10) monthID = 0 + monthID;
@@ -149,15 +174,12 @@ const ModifyCardComponent = () => {
       const finalizedCard = {...card, id: creationID, creationTime: creationTime};
       console.log(`Finalized card: ${JSON.stringify(finalizedCard)}`)
 
-      // HERE: Update feedback
       setFeedback({type: 'info', message: `You have created a new card! Clearing this page if you want to make a new one.`});
       
-      // HERE: Update app state with dispatch
       dispatch({type: actions.ADD_NEW_CARD, payload: finalizedCard});
+      save(state);
 
-      // HERE: Reset the CARD state
-      setCard({id: undefined, type: '', categories: '', topic: '', front: '', back: '', creationTime: undefined});
-
+      setCard({...card, id: undefined, type: '', topic: '', front: '', back: '', creationTime: undefined});
     }
 
     
@@ -175,8 +197,10 @@ const ModifyCardComponent = () => {
       <h1 style={{color: feedback.type === 'error' ? 'red' : 'black', textAlign: 'center', padding: '10px'}}>{feedback.message}</h1>
 
       <label>Card Categories (as many as you'd like, separated by commas)</label>
-      <input type='text' style={{width: '50vw', padding: '10px'}} value={card.categories} onChange={e => setCard({...card, categories: e.target.value})}></input>
-      
+      <div style={{display: 'flex', flexDirection: 'row'}}>
+        <input type='text' style={{width: '50vw', padding: '10px'}} value={card.categories} onChange={e => setCard({...card, categories: e.target.value})}></input>
+        <button className='btn small-btn' style={{marginLeft: '10px'}} onClick={() => setCard({...card, categories: ''})}>Clear</button>
+      </div>
       <label>(Optional) Short Description of Card's Topic</label>
       <input type='text' style={{width: '50vw', padding: '10px'}} value={card.topic} onChange={e => setCard({...card, topic: e.target.value})}></input>
 
@@ -259,6 +283,7 @@ const ModifyDeckComponent = () => {
       newDeck.id = creationID;
 
       dispatch({type: actions.ADD_NEW_DECK, payload: newDeck});
+      save(state);
 
       setDeck({
         name: '',
@@ -275,6 +300,8 @@ const ModifyDeckComponent = () => {
 
   // HERE: useEffect [] to update user's WHAT DO
 
+  // ADD: Deck description
+  // ADD: Filters for difficulty of cards (currently don't exist), maybe dual sliders for min difficulty, max difficulty
   return (
     <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
       <h1>{feedback.message}</h1>
@@ -335,6 +362,21 @@ const ViewDecksComponent = () => {
   return (
     <div>
       <h1>View your decks here!</h1>
+      <div className='decks-list-holder'>
+        {state.decks.map((deck, index) => (
+          <DeckPreview key={index} deck={deck} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const DeckPreview = (props) => {
+  const {deck} = props;
+
+  return (
+    <div className='deck-preview'>
+      <h2>{deck.name}</h2>
     </div>
   )
 }

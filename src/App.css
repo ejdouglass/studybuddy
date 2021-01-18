@@ -51,6 +51,19 @@
   border-radius: 10px;
 }
 
+.decks-list-holder {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 80vw;
+  border: 1px solid #0AF;
+  height: 50vh;
+  padding: 10px;
+  border-radius: 10px;
+}
+
 .card-preview {
   display: flex;
   width: 200px;
@@ -68,6 +81,24 @@
 
 .card-preview:hover {
   background-color: azure;
+}
+
+.deck-preview {
+  display: flex;
+  width: 90%;
+  height: 100px;
+  padding: 10px;
+  border: 1px solid cornflowerblue;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  transition: background-color 0.5s;
+}
+
+.deck-preview:hover {
+  background-color: antiquewhite;
 }
 
 .text-input {
