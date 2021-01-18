@@ -7,7 +7,8 @@ function rando(min, max) {
 }
 
 const actions = {
-  ADD_NEW_CARD: 'add_new_card'
+  ADD_NEW_CARD: 'add_new_card',
+  ADD_NEW_DECK: 'add_new_deck'
 };
 
 const Reducer = (state, action) => {
@@ -15,6 +16,9 @@ const Reducer = (state, action) => {
     case actions.ADD_NEW_CARD:
       let newCardPile = [...state.cards, action.payload];
       return {...state, cards: newCardPile};
+    case actions.ADD_NEW_DECK:
+      let newDeckPile = [...state.decks, action.payload];
+      return {...state, decks: newDeckPile};
     default:
       return state;
   }
@@ -63,7 +67,7 @@ const Header = () => {
     <div className='app-header' style={{display: 'flex', flexDirection: 'column'}}>
       <div style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
         <h1>Craft Ye The Finest Studying Materials, {state.username}.</h1>
-        <p>You currently have {state.cards.length} cards in your box.</p>
+        <p>You currently have {state.cards.length} cards in your box arranged into {state.decks.length} decks.</p>
       </div>
 
       <div style={{display: 'flex', flexDirection: 'row'}}>
@@ -191,10 +195,107 @@ const ModifyCardComponent = () => {
 
 const ModifyDeckComponent = () => {
   const [state, dispatch] = useContext(Context);
+  const [deck, setDeck] = useState({
+    name: '',
+    description: '',
+    autoCategories: [],
+    cards: [],
+    id: undefined,
+    creationTime: undefined
+  });
+  const [searchbar, setSearchbar] = useState('');
+  const [foundCards, setFoundCards] = useState([]);
+  const [feedback, setFeedback] = useState({type: 'info', message: `Make or modify a deck of cards here!`});
+
+  function performSearch(force) {
+    if (!searchbar) return;
+    let searchResults = state.cards.filter(card => card.categories.indexOf(searchbar) > -1);
+
+    if (!force) {
+      setFoundCards(searchResults);
+    } else if (force) {
+      let newCards = [...deck.cards];
+      searchResults.forEach(card => {
+        let duplicate = false;
+        deck.cards.forEach(currentCard => {
+          if (currentCard.id === card.id) duplicate = true;
+        });
+        if (!duplicate) newCards.push(card);
+      });
+      setDeck({...deck, cards: newCards});
+    }
+  }
+
+  function createDeck() {
+    let errorMessage = '';
+    if (!deck.name) errorMessage += `Please name the deck. `;
+    if (!deck.cards.length) errorMessage += `A deck should have at least one card in it. `;
+    if (errorMessage) {
+      setFeedback({type: 'error', message: errorMessage});
+    } else {
+      setFeedback({type: 'info', message: `Looks good. Creating new deck now...`});
+
+      let creationTime = new Date();
+      let monthID = (creationTime.getMonth() + 1).toString();
+      if (parseInt(monthID) < 10) monthID = 0 + monthID;
+
+      let dateID = creationTime.getDate().toString();
+      if (parseInt(dateID) < 10) dateID = 0 + dateID;
+
+      let hoursID = creationTime.getHours();
+      if (parseInt(hoursID) < 10) hoursID = 0 + hoursID;
+      
+      let minutesID = creationTime.getMinutes().toString();
+      if (parseInt(minutesID) < 10) minutesID = 0 + minutesID;
+
+      let secondsID = creationTime.getSeconds();
+      if (parseInt(secondsID) < 10) secondsID = 0 + secondsID;
+
+      let randoID = rando(0,9).toString() + rando(0,9).toString() + rando(0,9).toString() + rando(0,9).toString();
+
+      let creationID = creationTime.getFullYear().toString() + monthID + dateID + hoursID + minutesID + secondsID + randoID;
+      let newDeck = JSON.parse(JSON.stringify(deck));
+      newDeck.creationTime = creationTime;
+      newDeck.id = creationID;
+
+      dispatch({type: actions.ADD_NEW_DECK, payload: newDeck});
+
+      setDeck({
+        name: '',
+        description: '',
+        autoCategories: [],
+        cards: [],
+        id: undefined,
+        creationTime: undefined
+      });
+      
+      setFeedback({type: 'info', message: `Deck has been saved!`});
+    }
+  }
+
+  // HERE: useEffect [] to update user's WHAT DO
 
   return (
-    <div>
-      <h1>Make or modify a deck of cards here!</h1>
+    <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
+      <h1>{feedback.message}</h1>
+      <button className='btn small-btn' onClick={createDeck}>Create Deck</button>
+      <h2>Currently, this deck has {deck.cards.length} cards in it.</h2>
+      <label>Deck Name</label>
+      <input type='text' className='text-input' placeholder={'Name of Deck'} value={deck.name} onChange={e => setDeck({...deck, name: e.target.value})}></input>
+
+      <label>Search Card Categories</label>
+      <div style={{display: 'flex', flexDirection: 'row', height: '60px', justifyContent: 'space-around', alignItems: 'center'}}>
+        <input type='text' className='text-input' placeholder={'Search card categories'} value={searchbar} onChange={e => setSearchbar(e.target.value)}></input>
+        <button className='btn small-btn' onClick={() => performSearch(false)}>Search</button>
+        <button className='btn small-btn' onClick={() => performSearch(true)}>Search and Force Add</button>
+      </div>
+
+      <div className='cards-list-holder'>
+        {foundCards.map((card, index) => (
+          <CardPreview card={card} key={index} />
+        ))}
+      </div>
+
     </div>
   )
 }
@@ -202,10 +303,27 @@ const ModifyDeckComponent = () => {
 
 const ViewCardsComponent = () => {
   const [state, dispatch] = useContext(Context);
+  // HERE: local state object for filters
+  // HERE: local state for search string
 
   return (
-    <div>
-      <h1>View your cards here!</h1>
+    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+      <h1>Behold! Your CARDS!</h1>
+      <div className='cards-list-holder'>
+        {state.cards.map((card, index) => (
+        <CardPreview card={card} key={index} />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const CardPreview = (props) => {
+  const {card} = props;
+
+  return (
+    <div className='card-preview'>
+      <p style={{fontSize: '24px', fontWeight: '700'}}>{card.front}</p>
     </div>
   )
 }
