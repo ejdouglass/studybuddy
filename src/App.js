@@ -33,7 +33,6 @@ const Reducer = (state, action) => {
       // We'll test it out, but we're expecting a payload object with page URL and currentAction object, if applicable
       return {...state, whatdo: action.payload};
     case actions.LOAD_SAVED_DATA:
-      // Receives the entirety of previously saved state as payload, so... set state to that, I guess? Might ... it if that doesn't work well.
       return action.payload;
     default:
       return state;
@@ -47,7 +46,9 @@ const initialState = {
     currentAction: {}
   },
   cards: [],
-  decks: []
+  decks: [],
+  sessions: [],
+  history: {}
 }
 
 const Context = createContext(initialState);
@@ -73,6 +74,8 @@ const App = () => {
           <Route exact path='/modify_deck' component={ModifyDeckComponent} />
           <Route exact path='/view_cards' component={ViewCardsComponent} />
           <Route exact path='/view_decks' component={ViewDecksComponent} />
+          <Route exact path='/session_setup' component={SessionSetupComponent} />
+          <Route exact path='/session_study' component={SessionStudyComponent} />
         </div>
       </Router>
     </Store>
@@ -87,7 +90,7 @@ const Header = () => {
     // Ooh, fun. This fires whenever the app is refreshed, so we can use this to LOAD, I think.
     const loadedData = load();
     dispatch({type: actions.LOAD_SAVED_DATA, payload: loadedData})
-  }, []);
+  }, [dispatch]);
 
   return (
     <div className='app-header' style={{display: 'flex', flexDirection: 'column'}}>
@@ -102,6 +105,7 @@ const Header = () => {
         <button className='btn' onClick={() => history.push('/view_decks')}>My Decks</button>        
         <button className='btn' onClick={() => history.push('/modify_card')}>Card+</button>
         <button className='btn' onClick={() => history.push('/modify_deck')}>Deck+</button>
+        <button className='btn' onClick={() => history.push('/session_setup')}>Study!</button>
       </div>
     </div>
   )
@@ -177,7 +181,6 @@ const ModifyCardComponent = () => {
       setFeedback({type: 'info', message: `You have created a new card! Clearing this page if you want to make a new one.`});
       
       dispatch({type: actions.ADD_NEW_CARD, payload: finalizedCard});
-      save(state);
 
       setCard({...card, id: undefined, type: '', topic: '', front: '', back: '', creationTime: undefined});
     }
@@ -190,7 +193,13 @@ const ModifyCardComponent = () => {
   
   // HERE: Another useEffect to update WHAT IS DO as user goes along and enters stuff
 
-  // HERE: Yet another useEffect that checks any incoming params... if so, 
+  // HERE: Yet another useEffect that checks any incoming params, if so, load up for EDIT MODE instead of CREATE MODE
+
+  // Note that this, and the one for Decks, fires on first load, as well. It's unnecessary, but for now is acceptable.
+  useEffect(() => {
+    save(state);
+    console.log(`Detected a change in the cards. Saving.`);
+  }, [state.cards]);
 
   return (
     <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center'}}>
@@ -283,7 +292,6 @@ const ModifyDeckComponent = () => {
       newDeck.id = creationID;
 
       dispatch({type: actions.ADD_NEW_DECK, payload: newDeck});
-      save(state);
 
       setDeck({
         name: '',
@@ -299,6 +307,11 @@ const ModifyDeckComponent = () => {
   }
 
   // HERE: useEffect [] to update user's WHAT DO
+
+  useEffect(() => {
+    save(state);
+    console.log(`Detected a change in the decks. Saving.`);
+  }, [state.decks]);
 
   // ADD: Deck description
   // ADD: Filters for difficulty of cards (currently don't exist), maybe dual sliders for min difficulty, max difficulty
@@ -380,5 +393,73 @@ const DeckPreview = (props) => {
     </div>
   )
 }
+
+
+
+const SessionSetupComponent = () => {
+  const [state, dispatch] = useContext(Context);
+  const [sessionPrep, setSessionPrep] = useState({
+    decksToChoose: [state.decks],
+    decksToUse: []
+  })
+  const history = useHistory();
+
+  function addDeckToSession(deck) {
+    // THIS FXN: 
+    setSessionPrep({... sessionPrep, decksToUse: [... sessionPrep.decksToUse, deck]});
+  }
+
+  /*
+    For this component...
+    -- want to be able to select deck(s) to study from
+    -- select details, like "once through" or "unlimited iterations"
+    -- pass this all to SessionStudy to begin the session
+    -- 
+  */
+
+  // ERROR: This page works totally fine UNLESS I reload the page, then all the decks vanish into thin air. Whoopsie.
+
+  useEffect(() => {
+    // HERE: Let's make a new local state variable that's all the decks we have so we can "move" them from ToChoose to ToUse
+    console.log(`Initializing session prep decks to choose from...`);
+    setSessionPrep({...sessionPrep, decksToChoose: [...state.decks]});
+  }, []);
+
+  return (
+    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+      <h1>Session Setup</h1>
+      <h2>Select Decks to Study With</h2>
+      {sessionPrep.decksToChoose.map((deck, index) => (<button key={index} className='btn' onClick={() => addDeckToSession(deck)}>{deck.name}</button>))}
+      <button className='btn' onClick={() => history.push('/session_study')}>GO STUDY</button>
+    </div>
+  )
+}
+
+
+
+const SessionStudyComponent = () => {
+  const [state, dispatch] = useContext(Context);
+  const [sessionData, setSessionData] = useState({
+    startTime: undefined
+  });
+
+  /*
+    For this component...
+    -- be able to go through all the combined cards from the deck(s) in some order, which can be randomized
+    -- be able to select how comfortable you are with the info on each card from a 5-point scale
+    -- be able to set a timer/show a timer for the session
+    -- be able to know when the session is 'complete' either by hitting time, hitting end of deck, or by user declaration
+    -- keep track of how the session went and store that info on an ongoing basis in session data (history) and personal history
+      \_ little unsure of this "double storage" concept, feels redundant, but we'll try it and see how it goes
+  */
+
+  return (
+    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+      <h1>YOU ARE STUDYING NOW</h1>
+    </div>
+  )
+}
+
+
 
 export default App;
