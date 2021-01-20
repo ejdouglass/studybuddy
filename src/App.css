@@ -107,3 +107,20 @@
   text-align: center;
   font-size: 2vmin;
 }
+
+.session-setup-decks {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  padding: 10px;
+  border: 1px solid red;
+  width: 50vw;
+}
+
+#session-cards-choose-menu {
+  display: flex;
+  height: 50vh;
+  width: 80vw;
+  flex-direction: row;
+  border: 1px solid black;
+}
