@@ -422,10 +422,21 @@ const SessionSetupComponent = () => {
     setSessionPrep({... sessionPrep, decksToChoose: toChoose, decksToUse: toUse});
   }
 
+  function goStudy() {
+    const sessionData = {
+      decks: [...sessionPrep.decksToUse],
+      endWhen: sessionPrep.sessionEndCondition,
+      endAt: sessionPrep.sessionEndNumber
+    }
+    if (sessionData.decks.length < 1) alert(`You gotta choose at least one deck there, chief.`)
+    else history.push('/session_study', {sessionData: sessionData})
+  }
+
   /*
     For this component...
     -- select session details/plan, like "once through" or "unlimited iterations"
     -- pass this all to SessionStudy to begin the session
+    -- add barrier to user going to next page if
   */
 
   return (
@@ -490,7 +501,7 @@ const SessionSetupComponent = () => {
         </div>
       </div>
 
-      <button className='btn' onClick={() => history.push('/session_study')}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</button>
+      <button className='btn' onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</button>
 
     </div>
   )
@@ -498,11 +509,19 @@ const SessionSetupComponent = () => {
 
 
 
-const SessionStudyComponent = () => {
+const SessionStudyComponent = (props) => {
   const [state, dispatch] = useContext(Context);
   const [sessionData, setSessionData] = useState({
-    startTime: undefined
+    startTime: undefined,
+    timeElapsed: 0,
+    decks: [],
+    cards: [],
+    currentCardIndex: 0,
+    currentCardFace: 'front',
+    endWhen: undefined,
+    endAt: undefined
   });
+  
 
   /*
     For this component...
@@ -514,9 +533,71 @@ const SessionStudyComponent = () => {
       \_ little unsure of this "double storage" concept, feels redundant, but we'll try it and see how it goes
   */
 
+  function startSession() {
+    // HERE: Maybe throw in a quick shuffle here; otherwise the card order will be incredibly predictable :P
+    // Alternatively, can randomize where the Next card takes you, but that would involve more convoluted logic, I think.
+    setSessionData({...sessionData, startTime: new Date()});
+  }
+
+  function flipCurrentCard() {
+    let newCardFace = sessionData.currentCardFace === 'front' ? 'back' : 'front';
+    setSessionData({...sessionData, currentCardFace: newCardFace});
+  }
+
+  function changeCurrentCard(amount) {
+    switch (amount) {
+      case 1:
+        if (sessionData.currentCardIndex + 1 <= sessionData.cards.length - 1) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex + 1});
+        break;
+      case -1:
+        if (sessionData.currentCardIndex - 1 >= 0) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex - 1});
+        break;
+      default:
+        break;
+    }
+  }
+
+  useEffect(() => {
+    const session = JSON.parse(JSON.stringify(props.location.state.sessionData));
+    let sessionCards = [];
+    session.decks.forEach(deck => deck.cards.forEach(card => sessionCards.push(card)));
+    setSessionData({...sessionData, 
+      decks: session.decks.map(deck => deck.id), 
+      cards: sessionCards, 
+      endWhen: session.endWhen, 
+      endAt: session.endAt
+    });
+  }, [props.location.state.sessionData]);
+
+  // Add in conditional rendering for the param data; if not found, offer to redirect user back to set them up
   return (
     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
-      <h1>YOU ARE STUDYING NOW</h1>
+
+      {!sessionData.startTime &&
+      <div className='flex-centered flex-col'>
+        <h1>Time to study, buddy!</h1>
+        {/* HERE: Quick overview of what you're about to study with READY/BEGIN button */}
+        <button className='btn' onClick={startSession}>Begin!</button>
+      </div>
+      }
+
+      {sessionData.startTime &&
+      <div className='flex-centered flex-col'>
+        <h1>You ARE studying, buddy! You're on card {sessionData.currentCardIndex + 1} of {sessionData.cards.length}.</h1>
+
+        <div className='flex-centered' style={{width: '500px', height: '300px', border: '1px solid black'}}>
+          <textarea style={{border: '0', width: '490px', height: '200px', textAlign: 'center', resize: 'none', fontSize: '24px', fontFamily: 'sans-serif'}} value={sessionData.currentCardFace === 'front' ? sessionData.cards[sessionData.currentCardIndex].front : sessionData.cards[sessionData.currentCardIndex].back} readOnly={true}></textarea>
+        </div>
+        <button className='btn' onClick={flipCurrentCard}>FLIP!</button>
+
+        <div className='flex-centered flex-row'>
+          <button className='btn' onClick={() => changeCurrentCard(-1)}>PREV!</button>
+          <button className='btn' onClick={() => changeCurrentCard(1)}>NEXT!</button>
+        </div>
+
+      </div>
+      }
+
     </div>
   )
 }
