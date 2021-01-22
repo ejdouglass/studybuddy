@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, useState, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useState, useEffect, useRef, useCallback } from 'react';
 import { BrowserRouter as Router, Route, useHistory } from 'react-router-dom';
 import './App.css';
 
@@ -565,20 +565,6 @@ const SessionSetupComponent = () => {
 
 
 const SessionStudyComponent = (props) => {
-  const [state, dispatch] = useContext(Context);
-  const [sessionData, setSessionData] = useState({
-    startTime: undefined,
-    timeElapsed: 0,
-    decks: [],
-    cards: [],
-    currentCardIndex: 0,
-    currentCardFace: 'front',
-    endWhen: undefined,
-    endAt: undefined
-  });
-  const [studyTime, setStudyTime] = useState('0:00');
-  
-
   /*
     For this component...
     -- be able to set a timer/show a timer for the session
@@ -592,9 +578,51 @@ const SessionStudyComponent = (props) => {
       \_ Fairly 'advanced' and not super necessary option, but would be nice to have at some point
   */
 
+  const [state, dispatch] = useContext(Context);
+  const [sessionData, setSessionData] = useState({
+    startTime: undefined,
+    timeElapsed: 0,
+    decks: [],
+    cards: [],
+    currentCardIndex: 0,
+    currentCardFace: 'front',
+    iterations: 0,
+    endWhen: undefined,
+    endAt: undefined
+  });
+  const [studyTime, setStudyTime] = useState('0:00');
+  const keysDown = useRef({
+    Alt: false,
+    ArrowLeft: false,
+    ArrowRight: false,
+    ArrowDown: false,
+    ArrowUp: false,
+    Control: false,
+    s: false,
+    f: false
+  });
+  const keyDownCB = useCallback(keyEvent => {
+    handleKeyDown(keyEvent);
+  }, [handleKeyDown]);
+  const keyUpCB = useCallback(keyEvent => {
+    handleKeyUp(keyEvent);
+  }, [handleKeyUp]);
+
+  function handleKeyDown(e) {
+    e.preventDefault();
+    if (!keysDown.current[e.key]) {
+      keysDown.current[e.key] = true;
+      if (keysDown.current.f) flipCurrentCard();
+      if (keysDown.current.ArrowRight) changeCurrentCard(1);
+    }
+  }
+
+  function handleKeyUp(e) {
+    keysDown.current[e.key] = false;
+  }
+
   function startSession() {
     // HERE: Maybe throw in a quick shuffle here; otherwise the card order will be incredibly predictable :P
-    // Alternatively, can randomize where the Next card takes you, but that would involve more convoluted logic, I think.
     setSessionData({...sessionData, startTime: new Date()});
   }
 
@@ -607,7 +635,7 @@ const SessionStudyComponent = (props) => {
     switch (amount) {
       case 1:
         if (sessionData.currentCardIndex + 1 <= sessionData.cards.length - 1) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex + 1})
-        else setSessionData({...sessionData, currentCardIndex: 0}); // Change this ultimately to a HANDLE_END_OF_CARDS fxn, which changes based on 'mode'
+        else setSessionData({...sessionData, iterations: sessionData.iterations + 1});
         break;
       case -1:
         if (sessionData.currentCardIndex - 1 >= 0) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex - 1});
@@ -617,13 +645,21 @@ const SessionStudyComponent = (props) => {
     }
   }
 
-  
   function updateCardMastery(level) {
     // Feels clumsy, but let's see how it works...
     let sessionCopy = JSON.parse(JSON.stringify(sessionData));
     sessionCopy.cards[sessionData.currentCardIndex].mastery = level;
     setSessionData(sessionCopy);
   }
+
+  function finishSession() {
+    alert(`Session is over! I should show you results, but I don't know how yet.`);
+  }
+
+  useEffect(() => {
+    if (sessionData.endWhen === 'iterations' && sessionData.iterations >= sessionData.endAt) finishSession()
+    else setSessionData({...sessionData, currentCardIndex: 0});
+  }, [sessionData.iterations]);
 
   useEffect(() => {
     const session = JSON.parse(JSON.stringify(props.location.state.sessionData));
@@ -643,34 +679,38 @@ const SessionStudyComponent = (props) => {
     });
   }, [props.location.state.sessionData]);
 
-  // Ok, dependency array to the rescue! Adding studyTime made it work a LOT better, doesn't 'hang' when doing other stuff.
+  // ADD: If we're doing time-bound, check for hitting the time limit in here, and if limit's hit, fire off the finishSession() fxn
   useEffect(() =>{
     const timer = setTimeout(() => {
       // JSON parsing-stringing for the updateCardMastery broke this, but making a new Date() out of the startTime covers our bases
       let timeInMS = +new Date() - +new Date(sessionData.startTime);
       let timeInMin = Math.floor(timeInMS / 1000 / 60);
+
+      if (sessionData.endWhen === 'time' && timeInMin >= sessionData.endAt) {
+        finishSession();
+        return;
+      }
+
       let timeInSec = Math.floor((timeInMS - (timeInMin * 1000 * 60)) / 1000);
       if (timeInSec < 10) timeInSec = '0' + timeInSec;
       let comparableTime = timeInMin.toString() + ':' + timeInSec.toString();
-      console.log(comparableTime);
-      if (comparableTime === 'NaN:NaN') comparableTime = '0:01'; //Fixing a problem I don't understand, but effectively! :P
+      if (comparableTime === 'NaN:NaN') comparableTime = '0:01'; // Fixing a problem I don't understand, but effectively! :P
       setStudyTime(comparableTime);
     }, 1000);
-
-    // In the meantime, it flashes "NaN" for the first 'tick' and then rights itself? Weird. :P It's at 0:01 it's a bit... 'special.'
-    // let intervalTimer = setInterval(() => {
-    //   let timeInMS = +new Date() - +new Date(sessionData.startTime);
-    //   let timeInMin = Math.floor(timeInMS / 1000 / 60);
-    //   let timeInSec = Math.floor((timeInMS - (timeInMin * 6000 * 60)) / 1000);
-    //   if (timeInSec < 10) timeInSec = '0' + timeInSec;
-    //   setStudyTime(timeInMin.toString() + ':' + timeInSec.toString());
-    // }, 1000)
     
 
     return () => clearTimeout(timer);
-
-    // return () => clearInterval(intervalTimer);
   }, [studyTime]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', keyDownCB);
+    window.addEventListener('keyup', keyUpCB);
+
+    return () => {
+      window.removeEventListener('keydown', keyDownCB);
+      window.removeEventListener('keyup', keyUpCB);
+    }
+  }, [keyDownCB, keyUpCB]);
 
   // Add in conditional rendering for the param data; if not found, offer to redirect user back to set them up
   return (
