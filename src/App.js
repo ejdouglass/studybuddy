@@ -7,7 +7,7 @@ function save(state) {
 }
 
 function load() {
-  return JSON.parse(window.localStorage.getItem('studyBuddyData'));
+  return window.localStorage.getItem('studyBuddyData');
 }
 
 function rando(min, max) {
@@ -31,6 +31,7 @@ const Reducer = (state, action) => {
       return {...state, decks: newDeckPile};
     case actions.UPDATE_WHATDO:
       // We'll test it out, but we're expecting a payload object with page URL and currentAction object, if applicable
+      // Specifically, page and currentAction
       return {...state, whatdo: action.payload};
     case actions.LOAD_SAVED_DATA:
       return action.payload;
@@ -42,13 +43,16 @@ const Reducer = (state, action) => {
 const initialState = {
   username: 'Card-Seeker',
   whatdo: {
-    page: '?',
+    page: '/',
     currentAction: {}
   },
   cards: [],
   decks: [],
   sessions: [],
-  history: {}
+  history: {},
+  settings: {
+    font: 'default'
+  }
 }
 
 const Context = createContext(initialState);
@@ -76,6 +80,7 @@ const App = () => {
           <Route exact path='/view_decks' component={ViewDecksComponent} />
           <Route exact path='/session_setup' component={SessionSetupComponent} />
           <Route exact path='/session_study' component={SessionStudyComponent} />
+          <Route exact path='/user_preferences' component={UserPreferencesComponent} />
         </div>
       </Router>
     </Store>
@@ -88,9 +93,16 @@ const Header = () => {
 
   useEffect(() => {
     // Fires when app 'loads' freshly, so using this space for all loading logic
-    const loadedData = load();
-    dispatch({type: actions.LOAD_SAVED_DATA, payload: loadedData});
-    history.push('/');
+    let loadedData = load();
+    if (loadedData) {
+      loadedData = JSON.parse(loadedData);
+      dispatch({type: actions.LOAD_SAVED_DATA, payload: loadedData});
+      console.log(loadedData);
+      history.push(loadedData.whatdo.page);
+    } else {
+      history.push('/');
+    }
+    
   }, [dispatch]);
 
   return (
@@ -102,6 +114,7 @@ const Header = () => {
 
       <div style={{display: 'flex', flexDirection: 'row'}}>
         <button className='btn' onClick={() => history.push('/')}>Home</button>
+        <button className='btn' onClick={() => history.push('/user_preferences')}>User Stuff</button>
         <button className='btn' onClick={() => history.push('/view_cards')}>My Cards</button>
         <button className='btn' onClick={() => history.push('/view_decks')}>My Decks</button>        
         <button className='btn' onClick={() => history.push('/modify_card')}>Card+</button>
@@ -115,6 +128,14 @@ const Header = () => {
 const LandingComponent = () => {
   const [state, dispatch] = useContext(Context);
   const history = useHistory();
+
+  useEffect(() => {
+    dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/', currentAction: {}}});
+  }, []);
+
+  useEffect(() => {
+    save(state);
+  }, [state]);
 
   return (
     <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
@@ -196,11 +217,13 @@ const ModifyCardComponent = () => {
 
   // HERE: Yet another useEffect that checks any incoming params, if so, load up for EDIT MODE instead of CREATE MODE
 
-  // Note that this, and the one for Decks, fires on first load, as well. It's unnecessary, but for now is acceptable.
+  useEffect(() => {
+    dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/modify_card', currentAction: {}}});
+  }, []);
+
   useEffect(() => {
     save(state);
-    console.log(`Detected a change in the cards. Saving.`);
-  }, [state.cards]);
+  }, [state]);
 
   return (
     <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center'}}>
@@ -310,9 +333,12 @@ const ModifyDeckComponent = () => {
   // HERE: useEffect [] to update user's WHAT DO
 
   useEffect(() => {
+    dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/modify_deck', currentAction: {}}});
+  }, []);
+
+  useEffect(() => {
     save(state);
-    console.log(`Detected a change in the decks. Saving.`);
-  }, [state.decks]);
+  }, [state]);
 
   // ADD: Deck description
   // ADD: Filters for difficulty of cards (currently don't exist), maybe dual sliders for min difficulty, max difficulty
@@ -347,6 +373,14 @@ const ViewCardsComponent = () => {
   // HERE: local state object for filters
   // HERE: local state for search string
 
+  useEffect(() => {
+    dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/view_cards', currentAction: {}}});
+  }, []);
+
+  useEffect(() => {
+    save(state);
+  }, [state]);
+
   return (
     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
       <h1>Behold! Your CARDS!</h1>
@@ -372,6 +406,14 @@ const CardPreview = (props) => {
 
 const ViewDecksComponent = () => {
   const [state, dispatch] = useContext(Context);
+
+  useEffect(() => {
+    dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/view_decks', currentAction: {}}});
+  }, []);
+
+  useEffect(() => {
+    save(state);
+  }, [state]);
 
   return (
     <div>
@@ -439,6 +481,17 @@ const SessionSetupComponent = () => {
     -- add barrier to user going to next page if
   */
 
+  useEffect(() => {
+    dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/session_setup', currentAction: {}}});
+  }, []);
+
+  useEffect(() => {
+    save(state);
+    // The below is a pretty good "catch" for users reloading onto this page, but only assuming they haven't set up their session yet.
+    // Whatdo will have a bit of challenge with this one!
+    setSessionPrep({...sessionPrep, decksToChoose: state.decks});
+  }, [state]);
+
   return (
     <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
       <h1>Session Setup</h1>
@@ -501,6 +554,8 @@ const SessionSetupComponent = () => {
         </div>
       </div>
 
+      <button className='btn small-btn'>(({'<=='}ADD ALL VISIBLE DECKS BTN))</button>
+
       <button className='btn' onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</button>
 
     </div>
@@ -525,12 +580,13 @@ const SessionStudyComponent = (props) => {
 
   /*
     For this component...
-    -- be able to go through all the combined cards from the deck(s) in some order, which can be randomized
-    -- be able to select how comfortable you are with the info on each card from a 5-point scale
     -- be able to set a timer/show a timer for the session
-    -- be able to know when the session is 'complete' either by hitting time, hitting end of deck, or by user declaration
+    -- be able to know when the session is 'complete' either by hitting time, hitting end of deck, or by user declaration (already defined, just gotta use it)
+    -- add keyboard shortcuts 
     -- keep track of how the session went and store that info on an ongoing basis in session data (history) and personal history
       \_ little unsure of this "double storage" concept, feels redundant, but we'll try it and see how it goes
+    -- Post-session "results" data, including breakdown of mastery levels (visually pleasing way ideally-eventually), ability to make sub-deck of troublemakers
+    -- Add ability to "save" these sessions, including the settings and history
   */
 
   function startSession() {
@@ -547,7 +603,8 @@ const SessionStudyComponent = (props) => {
   function changeCurrentCard(amount) {
     switch (amount) {
       case 1:
-        if (sessionData.currentCardIndex + 1 <= sessionData.cards.length - 1) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex + 1});
+        if (sessionData.currentCardIndex + 1 <= sessionData.cards.length - 1) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex + 1})
+        else setSessionData({...sessionData, currentCardIndex: 0}); // Change this ultimately to a HANDLE_END_OF_CARDS fxn, which changes based on 'mode'
         break;
       case -1:
         if (sessionData.currentCardIndex - 1 >= 0) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex - 1});
@@ -557,10 +614,22 @@ const SessionStudyComponent = (props) => {
     }
   }
 
+  function updateCardMastery(level) {
+    // Feels clumsy, but let's see how it works...
+    let sessionCopy = JSON.parse(JSON.stringify(sessionData));
+    sessionCopy.cards[sessionData.currentCardIndex].mastery = level;
+    setSessionData(sessionCopy);
+  }
+
   useEffect(() => {
     const session = JSON.parse(JSON.stringify(props.location.state.sessionData));
     let sessionCards = [];
-    session.decks.forEach(deck => deck.cards.forEach(card => sessionCards.push(card)));
+    // COULD potentially throw the 'mastery' var for the card on each here, initialized to 0... ok, let's try that.
+    // session.decks.forEach(deck => deck.cards.forEach(card => sessionCards.push(card))); // 'old' way
+    session.decks.forEach(deck => deck.cards.forEach(card => {
+      card.mastery = 0;
+      sessionCards.push(card);
+    }));
     setSessionData({...sessionData, 
       decks: session.decks.map(deck => deck.id), 
       cards: sessionCards, 
@@ -590,14 +659,51 @@ const SessionStudyComponent = (props) => {
         </div>
         <button className='btn' onClick={flipCurrentCard}>FLIP!</button>
 
+        <h3>Mastery Level (currently {sessionData.cards[sessionData.currentCardIndex].mastery})</h3>
         <div className='flex-centered flex-row'>
-          <button className='btn' onClick={() => changeCurrentCard(-1)}>PREV!</button>
-          <button className='btn' onClick={() => changeCurrentCard(1)}>NEXT!</button>
+          <button className='btn btn-small' onClick={() => updateCardMastery(1)}>NO idea at all...</button>
+          <button className='btn btn-small' onClick={() => updateCardMastery(2)}>Still super difficult/unfamiliar.</button>
+          <button className='btn btn-small' onClick={() => updateCardMastery(3)}>It makes sense, but gotta think about it.</button>
+          <button className='btn btn-small' onClick={() => updateCardMastery(4)}>It's pretty easy.</button>
+          <button className='btn btn-small' onClick={() => updateCardMastery(5)}>Easy as pie-cake, effortless.</button>
         </div>
+
+        <button className='btn small-btn' onClick={() => changeCurrentCard(1)}>Next Card</button>
 
       </div>
       }
 
+    </div>
+  )
+}
+
+
+
+const UserPreferencesComponent = () => {
+  const [state, dispatch] = useContext(Context);
+
+  useEffect(() => {
+    dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/user_preferences', currentAction: {}}});
+  }, []);
+
+  useEffect(() => {
+    save(state);
+  }, [state]);
+
+  return (
+    <div className='flex-centered flex-col'>
+      <h1>User Preferences</h1>
+      <div className='flex-centered flex-row'>
+        <h3>Choose a Font</h3>
+        <button className='btn small-btn'>Font 1</button>
+        <button className='btn small-btn'>Font 2</button>
+      </div>
+      <div>
+        <button className='btn'>CLEAR APP DATA</button>
+      </div>
+      <div>
+        <button className='btn small-btn'>Export Data</button>
+      </div>
     </div>
   )
 }
