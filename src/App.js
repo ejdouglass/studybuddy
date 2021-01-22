@@ -576,6 +576,7 @@ const SessionStudyComponent = (props) => {
     endWhen: undefined,
     endAt: undefined
   });
+  const [studyTime, setStudyTime] = useState('0:00');
   
 
   /*
@@ -587,6 +588,8 @@ const SessionStudyComponent = (props) => {
       \_ little unsure of this "double storage" concept, feels redundant, but we'll try it and see how it goes
     -- Post-session "results" data, including breakdown of mastery levels (visually pleasing way ideally-eventually), ability to make sub-deck of troublemakers
     -- Add ability to "save" these sessions, including the settings and history
+    -- Add the option to "hide timer" OR "conditionally hide timer" i.e. let me know every once in awhile or when I have X time left
+      \_ Fairly 'advanced' and not super necessary option, but would be nice to have at some point
   */
 
   function startSession() {
@@ -614,6 +617,7 @@ const SessionStudyComponent = (props) => {
     }
   }
 
+  
   function updateCardMastery(level) {
     // Feels clumsy, but let's see how it works...
     let sessionCopy = JSON.parse(JSON.stringify(sessionData));
@@ -634,9 +638,39 @@ const SessionStudyComponent = (props) => {
       decks: session.decks.map(deck => deck.id), 
       cards: sessionCards, 
       endWhen: session.endWhen, 
-      endAt: session.endAt
+      endAt: session.endAt,
+      startTime: new Date()
     });
   }, [props.location.state.sessionData]);
+
+  // Ok, dependency array to the rescue! Adding studyTime made it work a LOT better, doesn't 'hang' when doing other stuff.
+  useEffect(() =>{
+    const timer = setTimeout(() => {
+      // JSON parsing-stringing for the updateCardMastery broke this, but making a new Date() out of the startTime covers our bases
+      let timeInMS = +new Date() - +new Date(sessionData.startTime);
+      let timeInMin = Math.floor(timeInMS / 1000 / 60);
+      let timeInSec = Math.floor((timeInMS - (timeInMin * 1000 * 60)) / 1000);
+      if (timeInSec < 10) timeInSec = '0' + timeInSec;
+      let comparableTime = timeInMin.toString() + ':' + timeInSec.toString();
+      console.log(comparableTime);
+      if (comparableTime === 'NaN:NaN') comparableTime = '0:01'; //Fixing a problem I don't understand, but effectively! :P
+      setStudyTime(comparableTime);
+    }, 1000);
+
+    // In the meantime, it flashes "NaN" for the first 'tick' and then rights itself? Weird. :P It's at 0:01 it's a bit... 'special.'
+    // let intervalTimer = setInterval(() => {
+    //   let timeInMS = +new Date() - +new Date(sessionData.startTime);
+    //   let timeInMin = Math.floor(timeInMS / 1000 / 60);
+    //   let timeInSec = Math.floor((timeInMS - (timeInMin * 6000 * 60)) / 1000);
+    //   if (timeInSec < 10) timeInSec = '0' + timeInSec;
+    //   setStudyTime(timeInMin.toString() + ':' + timeInSec.toString());
+    // }, 1000)
+    
+
+    return () => clearTimeout(timer);
+
+    // return () => clearInterval(intervalTimer);
+  }, [studyTime]);
 
   // Add in conditional rendering for the param data; if not found, offer to redirect user back to set them up
   return (
@@ -653,6 +687,10 @@ const SessionStudyComponent = (props) => {
       {sessionData.startTime &&
       <div className='flex-centered flex-col'>
         <h1>You ARE studying, buddy! You're on card {sessionData.currentCardIndex + 1} of {sessionData.cards.length}.</h1>
+
+        <div>
+          <h3>Study Time: {studyTime}</h3>
+        </div>
 
         <div className='flex-centered' style={{width: '500px', height: '300px', border: '1px solid black'}}>
           <textarea style={{border: '0', width: '490px', height: '200px', textAlign: 'center', resize: 'none', fontSize: '24px', fontFamily: 'sans-serif'}} value={sessionData.currentCardFace === 'front' ? sessionData.cards[sessionData.currentCardIndex].front : sessionData.cards[sessionData.currentCardIndex].back} readOnly={true}></textarea>
@@ -676,6 +714,7 @@ const SessionStudyComponent = (props) => {
     </div>
   )
 }
+
 
 
 
