@@ -32,7 +32,10 @@ const Reducer = (state, action) => {
       return {...state, cards: newCardPile};
     case actions.EDIT_A_CARD:
       // Since we're modifying a single known card, if we can figure out the INDEX, we're golden. This will apply to the decks, too.
-      return state;
+      // I guess double payload here? INDEX, and CARD itself. So we have action.payload.card and action.payload.index
+      let modCards = JSON.parse(JSON.stringify(state.cards));
+      modCards[action.payload.index] = action.payload.card;
+      return {...state, cards: modCards};
     case actions.REMOVE_A_CARD:
       // Receives the card's ID as payload
       // Needs to remove this card from all decks, too, which it currently doesn't
@@ -45,7 +48,10 @@ const Reducer = (state, action) => {
     case actions.REMOVE_A_DECK:
       return {...state, decks: state.decks.filter(deck => deck.id !== action.payload)};
     case actions.EDIT_A_DECK:
-      return state;
+      // Gimme a deck index and a new deck, like edit-a-card, and I'll get to work.
+      let modDecks = JSON.parse(JSON.stringify(state.decks));
+      modDecks[action.payload.index] = action.payload.deck;
+      return {...state, decks: modDecks};
     case actions.ADD_NEW_DECK:
       let newDeckPile = [...state.decks, action.payload];
       return {...state, decks: newDeckPile};
@@ -201,7 +207,9 @@ const ModifyCardComponent = (props) => {
       
       if (card.id) {
         console.log(`Oh! This card already exists. We should modify it instead of creating it.`);
-        dispatch({type: actions.EDIT_A_CARD, payload: card});
+        const indexToEdit = state.cards.findIndex(cardedit => cardedit.id === card.id);
+        dispatch({type: actions.EDIT_A_CARD, payload: {card: card, index: indexToEdit}});
+        setFeedback({type: 'info', message: `You have modified this card successfully!`});
         return;
       }
 
@@ -289,7 +297,7 @@ const ModifyCardComponent = (props) => {
 }
 
 
-const ModifyDeckComponent = () => {
+const ModifyDeckComponent = (props) => {
   const [state, dispatch] = useContext(Context);
   const [deck, setDeck] = useState({
     name: '',
@@ -331,6 +339,14 @@ const ModifyDeckComponent = () => {
     } else {
       setFeedback({type: 'info', message: `Looks good. Creating new deck now...`});
 
+      if (deck.id) {
+        console.log(`Deck already exists, we're just modifying it. Doing that now...`);
+        const indexToEdit = state.decks.findIndex(deckedit => deckedit.id === deck.id);
+        dispatch({type: actions.EDIT_A_DECK, payload: {deck: deck, index: indexToEdit}});
+        setFeedback({type: 'info', message: 'Deck successfully updated!'});
+        return;
+      }
+
       let creationTime = new Date();
       let monthID = (creationTime.getMonth() + 1).toString();
       if (parseInt(monthID) < 10) monthID = 0 + monthID;
@@ -369,7 +385,19 @@ const ModifyDeckComponent = () => {
     }
   }
 
-  // HERE: useEffect [] to update user's WHAT DO
+  function toggleCard(card) {
+    const cardsIndex = deck.cards.findIndex(checkcard => checkcard.id === card.id);
+    if (cardsIndex === -1) {
+      // Card's not in the deck, add it
+      let newDeckCards = [...deck.cards, card];
+      setDeck({...deck, cards: newDeckCards});
+      return;
+    } else {
+      // Already in the deck, toss it
+      let newDeckCards = deck.cards.filter(newCard => newCard.id !== card.id);
+      setDeck({...deck, cards: newDeckCards});
+    }
+  }
 
   useEffect(() => {
     dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/modify_deck', currentAction: {}}});
@@ -379,15 +407,29 @@ const ModifyDeckComponent = () => {
     save(state);
   }, [state]);
 
+  useEffect(() => {
+    if (props.location.state?.deckData) {
+      setDeck(props.location.state.deckData);
+    }
+  }, [props.location.state?.deckData]);
+
   // ADD: Deck description
   // ADD: Filters for difficulty of cards (currently don't exist), maybe dual sliders for min difficulty, max difficulty
   return (
-    <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-      <h1>{feedback.message}</h1>
-      <button className='btn small-btn' onClick={createDeck}>Create Deck</button>
+    <div className='flex-centered flex-col' style={{width: '80%'}}>
+
+      <div className='flex flex-row' style={{width: '100%', height: '100px', border: '1px solid black'}}>
+        <div className='flex-centered' style={{width: '50%'}}>
+          <input type='text' className='text-input' placeholder={'Name of Deck'} value={deck.name} onChange={e => setDeck({...deck, name: e.target.value})}></input>
+        </div>
+        <div className='flex-centered' style={{width: '50%'}}>
+          <h3>{feedback.message}</h3>
+        </div>
+      </div>
+      
+      <button className='btn small-btn' onClick={createDeck}>{deck.id ? 'Modify Deck' : 'Create Deck'}</button>
       <h2>Currently, this deck has {deck.cards.length} cards in it.</h2>
-      <label>Deck Name</label>
-      <input type='text' className='text-input' placeholder={'Name of Deck'} value={deck.name} onChange={e => setDeck({...deck, name: e.target.value})}></input>
+      
 
       <label>Search Card Categories</label>
       <div style={{display: 'flex', flexDirection: 'row', height: '60px', justifyContent: 'space-around', alignItems: 'center'}}>
@@ -396,12 +438,22 @@ const ModifyDeckComponent = () => {
         <button className='btn small-btn' onClick={() => performSearch(true)}>Search and Force Add</button>
       </div>
 
-      <div className='cards-list-holder'>
+      <div className='flex flex-row' style={{height: '400px', width: '100%', border: '1px solid black', padding: '10px'}}>
         {foundCards.map((card, index) => (
-          <CardPreview card={card} key={index} />
+          <CardPicker card={card} key={index} toggleCard={toggleCard} inDeck={deck.cards.findIndex(thiscard => thiscard.id === card.id) > -1} />
         ))}
       </div>
 
+    </div>
+  )
+}
+
+const CardPicker = (props) => {
+  const {card} = props;
+  const inDeck = props.inDeck;
+  return (
+    <div style={{display: 'flex', width: '150px', height: '120px', marginRight: '10px', border: inDeck ? '2px solid black' : '1px solid #CCC', borderRadius: '10px', fontSize: '18px', justifyContent: 'center', alignItems: 'center', textAlign: 'center', backgroundColor: inDeck ? 'white' : '#CCC'}} onClick={() => props.toggleCard(card)}>
+      {card.front}
     </div>
   )
 }
@@ -545,10 +597,10 @@ const ViewDecksComponent = () => {
 
   return (
     <div>
-      <h1>View your decks here!</h1>
+      <h1>Your Decks</h1>
       <div className='decks-list-holder'>
         {state.decks.map((deck, index) => (
-          <DeckPreview key={index} deck={deck} />
+          <DeckPreview key={index} deck={deck} dispatch={dispatch} />
         ))}
       </div>
     </div>
@@ -557,10 +609,31 @@ const ViewDecksComponent = () => {
 
 const DeckPreview = (props) => {
   const {deck} = props;
+  const history = useHistory();
+  const dispatch = props.dispatch;
+  const [selected, setSelected] = useState(false);
+  const [deleteCandidate, setDeleteCandidate] = useState(false);
 
   return (
-    <div className='deck-preview'>
-      <h2>{deck.name}</h2>
+    <div className='deck-preview flex flex-row' onMouseEnter={() => setSelected(true)} onMouseLeave={() => setSelected(false)}>
+      <div style={{fontSize: '24px', fontWeight: '600', flex: '1', border: '1px solid blue'}}>
+        {deck.name}
+      </div>
+      <div style={{fontSize: '24px', fontWeight: '600', flex: '1'}}>
+        Cards: {deck.cards.length}
+      </div>
+      <div style={{visibility: selected ? 'visible' : 'hidden', flex: '1'}}>
+        <button>Peep</button>
+        <button onClick={() => history.push('/modify_deck', {deckData: deck})}>Edit</button>
+        <button onClick={() => setDeleteCandidate(true)}>Delete</button>
+      </div>
+      {deleteCandidate &&
+      <div style={{flex: '1'}}>
+        <div> Are you sure you want to delete this deck? </div>
+        <button onClick={() => dispatch({type: actions.REMOVE_A_DECK, payload: deck.id})}>Yep</button>
+        <button onClick={() => setDeleteCandidate(false)}>Nah</button>
+      </div>  
+      }
     </div>
   )
 }
