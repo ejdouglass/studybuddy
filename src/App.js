@@ -16,7 +16,11 @@ function rando(min, max) {
 
 const actions = {
   ADD_NEW_CARD: 'add_new_card',
+  EDIT_A_CARD: 'edit_a_card',
+  REMOVE_A_CARD: 'remove_a_card',
   ADD_NEW_DECK: 'add_new_deck',
+  EDIT_A_DECK: 'edit_a_deck',
+  REMOVE_A_DECK: 'remove_a_deck',
   UPDATE_WHATDO: 'update_whatdo',
   LOAD_SAVED_DATA: 'load_saved_data'
 };
@@ -26,6 +30,22 @@ const Reducer = (state, action) => {
     case actions.ADD_NEW_CARD:
       let newCardPile = [...state.cards, action.payload];
       return {...state, cards: newCardPile};
+    case actions.EDIT_A_CARD:
+      // Since we're modifying a single known card, if we can figure out the INDEX, we're golden. This will apply to the decks, too.
+      return state;
+    case actions.REMOVE_A_CARD:
+      // Receives the card's ID as payload
+      // Needs to remove this card from all decks, too, which it currently doesn't
+      let updatedDecks = [...state.decks];
+      for (let i = 0; i < state.decks.length; i++) {
+        updatedDecks[i].cards = state.decks[i].cards.filter(card => card.id !== action.payload);
+      }
+      console.log(updatedDecks); // Yyyyeah this is just an empty array so it erases all decks, whoops :P
+      return {...state, cards: state.cards.filter(card => card.id !== action.payload), decks: updatedDecks};
+    case actions.REMOVE_A_DECK:
+      return {...state, decks: state.decks.filter(deck => deck.id !== action.payload)};
+    case actions.EDIT_A_DECK:
+      return state;
     case actions.ADD_NEW_DECK:
       let newDeckPile = [...state.decks, action.payload];
       return {...state, decks: newDeckPile};
@@ -147,7 +167,7 @@ const LandingComponent = () => {
   )
 }
 
-const ModifyCardComponent = () => {
+const ModifyCardComponent = (props) => {
   const [state, dispatch] = useContext(Context);
   // ADD: 'difficulty' marker
   const [card, setCard] = useState({
@@ -160,6 +180,7 @@ const ModifyCardComponent = () => {
     creationTime: undefined
   });
   const [feedback, setFeedback] = useState({type: 'info', message: 'Time to MAKE A NEW CARD!'});
+  const focusRef = useRef(null);
 
 
   function createNewCard() {
@@ -177,34 +198,46 @@ const ModifyCardComponent = () => {
       console.log(`I should be sharing the error: ${creationFeedback}`)
       return;
     } else {
-      // ADD: Logic for when the ID already exists so we don't give an old card a new ID. I mean, that'd be fine, but unnecessary.
-      let creationTime = new Date();
-      let monthID = (creationTime.getMonth() + 1).toString();
-      if (parseInt(monthID) < 10) monthID = 0 + monthID;
-
-      let dateID = creationTime.getDate().toString();
-      if (parseInt(dateID) < 10) dateID = 0 + dateID;
-
-      let hoursID = creationTime.getHours();
-      if (parseInt(hoursID) < 10) hoursID = 0 + hoursID;
       
-      let minutesID = creationTime.getMinutes().toString();
-      if (parseInt(minutesID) < 10) minutesID = 0 + minutesID;
+      if (card.id) {
+        console.log(`Oh! This card already exists. We should modify it instead of creating it.`);
+        dispatch({type: actions.EDIT_A_CARD, payload: card});
+        return;
+      }
 
-      let secondsID = creationTime.getSeconds();
-      if (parseInt(secondsID) < 10) secondsID = 0 + secondsID;
-
-      let randoID = rando(0,9).toString() + rando(0,9).toString() + rando(0,9).toString() + rando(0,9).toString();
-
-      let creationID = creationTime.getFullYear().toString() + monthID + dateID + hoursID + minutesID + secondsID + randoID;
-      const finalizedCard = {...card, id: creationID, creationTime: creationTime};
-      console.log(`Finalized card: ${JSON.stringify(finalizedCard)}`)
+      const creationTime = new Date();
+      let finalizedCard = {...card};
+      if (!card.creationTime) {
+        finalizedCard = {...finalizedCard, creationTime: creationTime};
+      }
+      if (!card.id) {
+        let monthID = (creationTime.getMonth() + 1).toString();
+        if (parseInt(monthID) < 10) monthID = 0 + monthID;
+  
+        let dateID = creationTime.getDate().toString();
+        if (parseInt(dateID) < 10) dateID = 0 + dateID;
+  
+        let hoursID = creationTime.getHours();
+        if (parseInt(hoursID) < 10) hoursID = 0 + hoursID;
+        
+        let minutesID = creationTime.getMinutes().toString();
+        if (parseInt(minutesID) < 10) minutesID = 0 + minutesID;
+  
+        let secondsID = creationTime.getSeconds();
+        if (parseInt(secondsID) < 10) secondsID = 0 + secondsID;
+  
+        let randoID = rando(0,9).toString() + rando(0,9).toString() + rando(0,9).toString() + rando(0,9).toString();
+  
+        let creationID = creationTime.getFullYear().toString() + monthID + dateID + hoursID + minutesID + secondsID + randoID;
+        finalizedCard = {...finalizedCard, id: creationID};
+      }
 
       setFeedback({type: 'info', message: `You have created a new card! Clearing this page if you want to make a new one.`});
       
       dispatch({type: actions.ADD_NEW_CARD, payload: finalizedCard});
 
       setCard({...card, id: undefined, type: '', topic: '', front: '', back: '', creationTime: undefined});
+      focusRef.current.focus();
     }
 
     
@@ -225,6 +258,12 @@ const ModifyCardComponent = () => {
     save(state);
   }, [state]);
 
+  useEffect(() => {
+    if (props.location.state?.cardData) {
+      setCard({...props.location.state.cardData});
+    }
+  }, [props.location.state?.cardData]);
+
   return (
     <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center'}}>
       <h1 style={{color: feedback.type === 'error' ? 'red' : 'black', textAlign: 'center', padding: '10px'}}>{feedback.message}</h1>
@@ -238,12 +277,12 @@ const ModifyCardComponent = () => {
       <input type='text' style={{width: '50vw', padding: '10px'}} value={card.topic} onChange={e => setCard({...card, topic: e.target.value})}></input>
 
       <label>Front</label>
-      <textarea className='create-card' value={card.front} rows='3' cols='50' onChange={e => setCard({...card, front: e.target.value})}></textarea>
+      <textarea className='create-card' ref={focusRef} value={card.front} rows='3' cols='50' onChange={e => setCard({...card, front: e.target.value})}></textarea>
 
       <label>Back</label>
       <textarea className='create-card' value={card.back} rows='5' cols='50' onChange={e => setCard({...card, back: e.target.value})}></textarea>
 
-      <button className='btn' onClick={createNewCard}>Create</button>
+      <button className='btn' onClick={createNewCard}>{card.id ? 'Update Card' : 'Make New Card'}</button>
 
     </div>
   )
@@ -370,6 +409,7 @@ const ModifyDeckComponent = () => {
 
 const ViewCardsComponent = () => {
   const [state, dispatch] = useContext(Context);
+  const history = useHistory();
   const [filter, setFilter] = useState({
     front: true,
     back: true,
@@ -378,6 +418,14 @@ const ViewCardsComponent = () => {
   });
   const [search, setSearch] = useState('');
   const [viewedCards, setViewedCards] = useState([]);
+  const [deletionDetails, setDeletionDetails] = useState({
+    card: {},
+    confirmDelete: false
+  });
+
+  function deleteCard(card) {
+    setDeletionDetails({...deletionDetails, card: card});
+  }
 
   useEffect(() => {
     dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/view_cards', currentAction: {}}});
@@ -385,7 +433,7 @@ const ViewCardsComponent = () => {
 
   useEffect(() => {
     save(state);
-    setViewedCards(state.cards);
+    setViewedCards(state.cards); // Might have to change this due to card deletion logic? We'll see
   }, [state]);
 
   useEffect(() => {
@@ -413,10 +461,30 @@ const ViewCardsComponent = () => {
         return searchFound;
       }));
   }
-  }, [search])
+  }, [search]);
+
+  useEffect(() => {
+    // Set up DELETION PROMPT RESPONSE
+    if (deletionDetails.confirmDelete) {
+      dispatch({type: actions.REMOVE_A_CARD, payload: deletionDetails.card.id});
+      setDeletionDetails({card: {}, confirmDelete: false});
+    }
+    // Also set deletionDetails.card back to undefined when done
+  }, [deletionDetails.confirmDelete]);
 
   return (
     <div className='flex-centered flex-col'>
+
+      {deletionDetails.card?.id &&
+      <div className='flex-centered flex-col'>
+        <h1>Are you sure you want to delete this card?</h1>
+        <div className='flex-centered flex-row'>
+          <button className='btn small-btn' onClick={() => setDeletionDetails({...deletionDetails, confirmDelete: true})}>Yep</button>
+          <button className='btn small-btn' onClick={() => setDeletionDetails({...deletionDetails, card: {}})}>Nah</button>
+        </div>
+      </div>
+      }
+
       <div className='flex-centered flex-row' style={{width: '90vw', justifyContent: 'space-around', border: '1px solid black'}}>
         <p>Search and Mod Cards</p>
         <div>
@@ -435,7 +503,7 @@ const ViewCardsComponent = () => {
       </div>
       <div className='cards-list-holder'>
         {viewedCards.map((card, index) => (
-        <CardPreview card={card} key={index} />
+        <CardPreview card={card} key={index} deleteCard={deleteCard} history={history}/>
         ))}
       </div>
     </div>
@@ -445,6 +513,7 @@ const ViewCardsComponent = () => {
 const CardPreview = (props) => {
   const {card} = props;
   const [optionsVisible, setOptionsVisible] = useState(false);
+  const deleteCard = props.deleteCard;
 
   return (
     <div className='card-preview' onMouseEnter={() => setOptionsVisible(true)} onMouseLeave={() => setOptionsVisible(false)}>
@@ -454,7 +523,8 @@ const CardPreview = (props) => {
       
       <div style={{visibility: optionsVisible ? 'visible' : 'hidden', flex: 1}}>
         <button>Peep</button>
-        <button>Delete</button>
+        <button onClick={() => deleteCard(card)}>Delete</button>
+        <button onClick={() => props.history.push('/modify_card', {cardData: card})}>Edit</button>
       </div>
 
     </div>
