@@ -152,3 +152,8 @@
 .flex-col {
   flex-direction: column;
 }
+
+.select-mastery-btn {
+  width: 120px;
+  height: 60px;
+}

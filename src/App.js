@@ -31,14 +31,20 @@ const Reducer = (state, action) => {
       let newCardPile = [...state.cards, action.payload];
       return {...state, cards: newCardPile};
     case actions.EDIT_A_CARD:
-      // Since we're modifying a single known card, if we can figure out the INDEX, we're golden. This will apply to the decks, too.
-      // I guess double payload here? INDEX, and CARD itself. So we have action.payload.card and action.payload.index
+      // Edits a single card. However, it does NOT currently update this card in various decks. Whoops! It probably should. :P
+      let decksCopy = JSON.parse(JSON.stringify(state.decks));
+      for (let i = 0; i < decksCopy.length; i++) {
+        let indexToChange = decksCopy[i].cards.findIndex(card => card.id === action.payload.card.id);
+        if (indexToChange === -1) break;
+        if (indexToChange >= 0) {
+          decksCopy[i].cards[indexToChange] = action.payload.card;
+        }
+      }
       let modCards = JSON.parse(JSON.stringify(state.cards));
       modCards[action.payload.index] = action.payload.card;
-      return {...state, cards: modCards};
+      return {...state, cards: modCards, decks: decksCopy};
     case actions.REMOVE_A_CARD:
       // Receives the card's ID as payload
-      // Needs to remove this card from all decks, too, which it currently doesn't
       let updatedDecks = [...state.decks];
       for (let i = 0; i < state.decks.length; i++) {
         updatedDecks[i].cards = state.decks[i].cards.filter(card => card.id !== action.payload);
@@ -789,7 +795,8 @@ const SessionStudyComponent = (props) => {
     currentCardFace: 'front',
     iterations: 0,
     endWhen: undefined,
-    endAt: undefined
+    endAt: undefined,
+    finished: false
   });
   const [studyTime, setStudyTime] = useState('0:00');
   const keysDown = useRef({
@@ -802,6 +809,7 @@ const SessionStudyComponent = (props) => {
     s: false,
     f: false
   });
+  const answerRef = useRef(null);
   const keyDownCB = useCallback(keyEvent => {
     handleKeyDown(keyEvent);
   }, [handleKeyDown]);
@@ -810,11 +818,20 @@ const SessionStudyComponent = (props) => {
   }, [handleKeyUp]);
 
   function handleKeyDown(e) {
-    e.preventDefault();
-    if (!keysDown.current[e.key]) {
+    // e.preventDefault(); // This is fighting with other stuff I want the user to be able to do, so cutting it for noooow...
+    // UPDATE: Yeah, we need a separate MODE CHECK here that's activated when the user is giving an answer :P
+
+    if (!keysDown.current[e.key] && document.activeElement !== answerRef.current) {
+      e.preventDefault();
       keysDown.current[e.key] = true;
       if (keysDown.current.f) flipCurrentCard();
       if (keysDown.current.ArrowRight) changeCurrentCard(1);
+      if (keysDown.current[1]) updateCardMastery(1);
+      if (keysDown.current[2]) updateCardMastery(2);
+      if (keysDown.current[3]) updateCardMastery(3);
+      if (keysDown.current[4]) updateCardMastery(4);
+      if (keysDown.current[5]) updateCardMastery(5);
+      if (keysDown.current.a) answerRef.current.focus();
     }
   }
 
@@ -823,8 +840,7 @@ const SessionStudyComponent = (props) => {
   }
 
   function startSession() {
-    // HERE: Maybe throw in a quick shuffle here; otherwise the card order will be incredibly predictable :P
-    setSessionData({...sessionData, startTime: new Date()});
+    // setSessionData({...sessionData, startTime: new Date()});
   }
 
   function flipCurrentCard() {
@@ -835,11 +851,11 @@ const SessionStudyComponent = (props) => {
   function changeCurrentCard(amount) {
     switch (amount) {
       case 1:
-        if (sessionData.currentCardIndex + 1 <= sessionData.cards.length - 1) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex + 1})
+        if (sessionData.currentCardIndex + 1 <= sessionData.cards.length - 1) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex + 1, currentCardFace: 'front'})
         else setSessionData({...sessionData, iterations: sessionData.iterations + 1});
         break;
       case -1:
-        if (sessionData.currentCardIndex - 1 >= 0) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex - 1});
+        if (sessionData.currentCardIndex - 1 >= 0) setSessionData({...sessionData, currentCardIndex: sessionData.currentCardIndex - 1, currentCardFace: 'front'});
         break;
       default:
         break;
@@ -854,7 +870,15 @@ const SessionStudyComponent = (props) => {
   }
 
   function finishSession() {
-    alert(`Session is over! I should show you results, but I don't know how yet.`);
+    // THIS FXN: End the session. If the user ended it and it hadn't naturally met its "done" conditions, note that.
+    setSessionData({...sessionData, finished: true});
+    // HERE: Push results of session to personal history
+  }
+
+  function updateAnswer(value) {
+    let sessionCards = JSON.parse(JSON.stringify(sessionData.cards));
+    sessionCards[sessionData.currentCardIndex].answer = value;
+    setSessionData({...sessionData, cards: sessionCards});
   }
 
   useEffect(() => {
@@ -871,6 +895,7 @@ const SessionStudyComponent = (props) => {
       card.mastery = 0;
       sessionCards.push(card);
     }));
+    sessionCards.sort(() => Math.random() - 0.5);
     setSessionData({...sessionData, 
       decks: session.decks.map(deck => deck.id), 
       cards: sessionCards, 
@@ -915,7 +940,7 @@ const SessionStudyComponent = (props) => {
 
   // Add in conditional rendering for the param data; if not found, offer to redirect user back to set them up
   return (
-    <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+    <div style={{width: '90%', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
 
       {!sessionData.startTime &&
       <div className='flex-centered flex-col'>
@@ -925,30 +950,52 @@ const SessionStudyComponent = (props) => {
       </div>
       }
 
-      {sessionData.startTime &&
-      <div className='flex-centered flex-col'>
+      {(sessionData.startTime && !sessionData.finished) &&
+      <div className='flex-centered flex-col' style={{width: '100%'}}>
         <h1>You ARE studying, buddy! You're on card {sessionData.currentCardIndex + 1} of {sessionData.cards.length}.</h1>
 
         <div>
           <h3>Study Time: {studyTime}</h3>
         </div>
 
-        <div className='flex-centered' style={{width: '500px', height: '300px', border: '1px solid black'}}>
-          <textarea style={{border: '0', width: '490px', height: '200px', textAlign: 'center', resize: 'none', fontSize: '24px', fontFamily: 'sans-serif'}} value={sessionData.currentCardFace === 'front' ? sessionData.cards[sessionData.currentCardIndex].front : sessionData.cards[sessionData.currentCardIndex].back} readOnly={true}></textarea>
+        <div className='flex flex-row' style={{width: '90%', border: '1px solid black', justifyContent: 'space-around', alignItems: 'center'}}>
+          <div className='flex-centered flex-col'>
+            <h3>Mastery Level:{sessionData.cards[sessionData.currentCardIndex].mastery}</h3>
+            <button className='select-mastery-btn' onClick={() => updateCardMastery(1)}>NO idea at all...</button>
+            <button className='select-mastery-btn' onClick={() => updateCardMastery(2)}>Still super difficult/unfamiliar.</button>
+            <button className='select-mastery-btn' onClick={() => updateCardMastery(3)}>It makes sense, but gotta think about it.</button>
+            <button className='select-mastery-btn' onClick={() => updateCardMastery(4)}>It's pretty easy.</button>
+            <button className='select-mastery-btn' onClick={() => updateCardMastery(5)}>Easy as pie-cake, effortless.</button>
+          </div>
+
+          <div className='flex-centered' style={{width: '500px', height: '300px', border: '1px solid black'}}>
+            <textarea style={{border: '0', width: '490px', height: '200px', textAlign: 'center', resize: 'none', fontSize: '24px', fontFamily: 'sans-serif'}} value={sessionData.currentCardFace === 'front' ? sessionData.cards[sessionData.currentCardIndex].front : sessionData.cards[sessionData.currentCardIndex].back} readOnly={true}></textarea>
+          </div>
+
+          <div className='flex flex-col'>
+            <h3>Viewing Card's {sessionData.currentCardFace.toUpperCase()}</h3>
+            <button className='btn' onClick={flipCurrentCard}>(F)LIP!</button>
+            <button className='btn small-btn' onClick={() => changeCurrentCard(1)}>Next Card</button>
+          </div>
         </div>
-        <button className='btn' onClick={flipCurrentCard}>FLIP!</button>
 
-        <h3>Mastery Level (currently {sessionData.cards[sessionData.currentCardIndex].mastery})</h3>
-        <div className='flex-centered flex-row'>
-          <button className='btn btn-small' onClick={() => updateCardMastery(1)}>NO idea at all...</button>
-          <button className='btn btn-small' onClick={() => updateCardMastery(2)}>Still super difficult/unfamiliar.</button>
-          <button className='btn btn-small' onClick={() => updateCardMastery(3)}>It makes sense, but gotta think about it.</button>
-          <button className='btn btn-small' onClick={() => updateCardMastery(4)}>It's pretty easy.</button>
-          <button className='btn btn-small' onClick={() => updateCardMastery(5)}>Easy as pie-cake, effortless.</button>
+        <div>
+          <button onClick={finishSession}>Finish Studying</button>
         </div>
+        
+        <div style={{width: '60%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
+          <textarea ref={answerRef} placeholder={'Tap (a) key to focus this answer section'} style={{padding: '10px', border: '1px solid black', width: '100%', height: '200px', textAlign: 'center', resize: 'none', fontSize: '24px', fontFamily: 'sans-serif'}} value={sessionData.cards[sessionData.currentCardIndex].answer} onChange={e => updateAnswer(e.target.value)}></textarea>
+        </div>
+        
 
-        <button className='btn small-btn' onClick={() => changeCurrentCard(1)}>Next Card</button>
+      </div>
+      }
 
+      {sessionData.finished && 
+      <div>
+        <h1>Study Session OVER!</h1>
+        <h2>Results: You did it.</h2>
+        {/* HERE: Display more session data */}
       </div>
       }
 
