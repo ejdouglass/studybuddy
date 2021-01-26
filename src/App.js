@@ -1009,6 +1009,11 @@ const SessionStudyComponent = (props) => {
 const UserPreferencesComponent = () => {
   const [state, dispatch] = useContext(Context);
 
+  function copyData() {
+    document.querySelector('#text-app-data').select();
+    document.execCommand('copy');
+  }
+
   useEffect(() => {
     dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/user_preferences', currentAction: {}}});
   }, []);
@@ -1029,7 +1034,10 @@ const UserPreferencesComponent = () => {
         <button className='btn'>CLEAR APP DATA</button>
       </div>
       <div>
-        <button className='btn small-btn'>Export Data</button>
+        <textarea id='text-app-data' value={JSON.stringify(state)} style={{resize: 'none', width: '80vw', height: '300px', border: '1px solid black'}} readOnly={true}></textarea>
+      </div>
+      <div>
+        <button className='btn small-btn' onClick={copyData}>Copy App Data to Clipboard</button>
       </div>
     </div>
   )
