@@ -1008,10 +1008,23 @@ const SessionStudyComponent = (props) => {
 
 const UserPreferencesComponent = () => {
   const [state, dispatch] = useContext(Context);
+  const [loaderFile, setLoaderFile] = useState();
+  const [appDataString, setAppDataString] = useState('');
 
   function copyData() {
     document.querySelector('#text-app-data').select();
     document.execCommand('copy');
+  }
+
+  function saveDataToFile() {
+    const a = document.createElement('a');
+    const file = new Blob([JSON.stringify(state)], {type: 'application/json'});
+
+    a.href = URL.createObjectURL(file);
+    a.download = 'study_buddy_data.txt';
+    a.click();
+
+    URL.revokeObjectURL(a.href);
   }
 
   useEffect(() => {
@@ -1022,22 +1035,49 @@ const UserPreferencesComponent = () => {
     save(state);
   }, [state]);
 
+  useEffect(() => {
+    if (loaderFile) {
+      let reader = new FileReader();
+      reader.onload = (e) => {
+        setAppDataString(reader.result);
+      }
+      reader.readAsText(loaderFile[0]);
+    }
+  }, [loaderFile]);
+
+  useEffect(() => {
+    if (appDataString) {
+      // Loads up the app data from the previously-saved .txt file. Huh. May have to do this for Ideas, too.
+      dispatch({type: actions.LOAD_SAVED_DATA, payload: JSON.parse(appDataString)});
+    }
+  }, [appDataString]);
+
   return (
-    <div className='flex-centered flex-col'>
+    <div className='flex-centered flex-col' style={{height: '100%', justifyContent: 'space-around'}}>
       <h1>User Preferences</h1>
-      <div className='flex-centered flex-row'>
-        <h3>Choose a Font</h3>
-        <button className='btn small-btn'>Font 1</button>
-        <button className='btn small-btn'>Font 2</button>
+      <div className='flex-centered flex-col'>
+        <div className='flex'><h2>Choose a Font</h2></div>
+        <div className='flex flex-row' style={{marginTop: '5px'}}>
+          <button className='btn small-btn' style={{marginRight: '10px'}}>Sans</button>
+          <button className='btn small-btn'>Serious</button>
+        </div>
       </div>
       <div>
-        <button className='btn'>CLEAR APP DATA</button>
+        <button className='btn small-btn'>CLEAR APP DATA</button>
       </div>
+
       <div>
-        <textarea id='text-app-data' value={JSON.stringify(state)} style={{resize: 'none', width: '80vw', height: '300px', border: '1px solid black'}} readOnly={true}></textarea>
+        <input type='file' id='file-selector' accept='.txt' onChange={e => setLoaderFile(e.target.files)} ></input>
+      </div>
+
+      <div>
+        <textarea id='text-app-data' value={JSON.stringify(state)} style={{resize: 'none', width: '40vw', height: '300px', border: '1px solid black'}} readOnly={true}></textarea>
       </div>
       <div>
         <button className='btn small-btn' onClick={copyData}>Copy App Data to Clipboard</button>
+      </div>
+      <div>
+        <button className='btn small-btn' onClick={saveDataToFile}>Save App Data as .txt File</button>
       </div>
     </div>
   )
