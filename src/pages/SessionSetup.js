@@ -2,15 +2,17 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
+import { Title, PageContainer, ButtonPrompt, Button, Segment, SessionVariablesContainer, InputContainer, Input, Select, ValueModifierButton } from '../components/styles';
 
 const SessionSetup = () => {
     const [state, dispatch] = useContext(Context);
     const [sessionPrep, setSessionPrep] = useState({
       decksToChoose: state.decks,
       decksToUse: [],
-      sessionEndCondition: undefined,
+      sessionEndCondition: 'user',
       sessionEndNumber: 5
-    })
+    });
+    const [deckSearch, setDeckSearch] = useState('');
     const history = useHistory();
   
     function addDeckToSession(deck) {
@@ -57,27 +59,27 @@ const SessionSetup = () => {
     }, [state]);
   
     return (
-      <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
-        <h1>Session Setup</h1>
+      <PageContainer>
+        <Title>Session Setup</Title>
         
         {/* HERE: Menu for session deets  */}
         <div id='session-details-menu'>
           
           
-          <h2>For this session, we'll keep going through the deck(s) until...</h2>
+          <ButtonPrompt>Session ends when:</ButtonPrompt>
           <div style={{display: 'flex', flexDirection: 'row', width: '80vw'}}>
   
-            <div style={{display: 'flex', flex: '2', flexDirection: 'row', justifyContent: 'space-around'}}>
-              <button className='btn small-btn' onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'time'})}>we reach a time limit</button>
-              <button className='btn small-btn' onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'iterations'})}>we go through all cards X times</button>
-              <button className='btn small-btn' onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'user'})}>we choose to end the session</button>
-            </div>
+            <Segment half>
+              <Button left selected={sessionPrep.sessionEndCondition === 'time'} onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'time'})}>I reach a time limit</Button>
+              <Button segment selected={sessionPrep.sessionEndCondition === 'user'} onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'user'})}>I manually end the session</Button>
+              <Button right selected={sessionPrep.sessionEndCondition === 'iterations'} onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'iterations'})}>I go through all cards X times</Button>
+            </Segment>
   
-            <div style={{flex: '1'}}>
+            <SessionVariablesContainer>
               {sessionPrep.sessionEndCondition === 'time' &&
-              <div>
-                <h3>Set Time Limit</h3>
-                <select value={sessionPrep.sessionEndNumber} onChange={e => setSessionPrep({...sessionPrep, sessionEndNumber: e.target.value})}>
+              <InputContainer wide row>
+                <ButtonPrompt>Set Time Limit</ButtonPrompt>
+                <Select value={sessionPrep.sessionEndNumber} onChange={e => setSessionPrep({...sessionPrep, sessionEndNumber: e.target.value})}>
                   <option value={5}>5 min</option>
                   <option value={10}>10 min</option>
                   <option value={15}>15 min</option>
@@ -87,21 +89,23 @@ const SessionSetup = () => {
                   <option value={35}>35 min</option>
                   <option value={40}>40 min</option>
                   <option value={45}>45 min</option>
-                </select>
-              </div>
+                </Select>
+              </InputContainer>
               }
               {sessionPrep.sessionEndCondition === 'iterations' &&
-              <div>
-                <h3>Set Iterations Limit</h3>
-                <input type='number' value={sessionPrep.sessionEndNumber} min={1} max={100} onChange={e => setSessionPrep({...sessionPrep, sessionEndNumber: e.target.value})}></input>
-              </div>
+              <InputContainer>
+                <ButtonPrompt>Set Iterations Limit</ButtonPrompt>
+                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndNumber: sessionPrep.sessionEndNumber > 1 ? sessionPrep.sessionEndNumber - 1 : 1})}>-</ValueModifierButton>
+                <Input centered type='text' readOnly={true} value={sessionPrep.sessionEndNumber} min={1} max={100}></Input>
+                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndNumber: sessionPrep.sessionEndNumber + 1})}>+</ValueModifierButton>
+              </InputContainer>
               }
               {sessionPrep.sessionEndCondition === 'user' &&
-              <div>
-                <h3>You Good</h3>
-              </div>
+              <InputContainer>
+                <ButtonPrompt>Just tap the button when you're done!</ButtonPrompt>
+              </InputContainer>
               }
-            </div>
+            </SessionVariablesContainer>
   
           </div>
   
@@ -122,7 +126,7 @@ const SessionSetup = () => {
   
         <button className='btn' onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</button>
   
-      </div>
+      </PageContainer>
     )
 }
 

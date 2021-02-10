@@ -4,9 +4,6 @@ import { Context } from '../context/context';
 const SessionStudy = (props) => {
     /*
       For this component...
-      -- be able to set a timer/show a timer for the session
-      -- be able to know when the session is 'complete' either by hitting time, hitting end of deck, or by user declaration (already defined, just gotta use it)
-      -- add keyboard shortcuts 
       -- keep track of how the session went and store that info on an ongoing basis in session data (history) and personal history
         \_ little unsure of this "double storage" concept, feels redundant, but we'll try it and see how it goes
       -- Post-session "results" data, including breakdown of mastery levels (visually pleasing way ideally-eventually), ability to make sub-deck of troublemakers

@@ -2,6 +2,7 @@ import React, { useContext, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { load } from '../functions/globalfxns';
+import { AppHeader, NavContainer, NavButton } from '../components/styles';
 
 const Header = () => {
     const [state, dispatch] = useContext(Context);
@@ -22,22 +23,17 @@ const Header = () => {
     }, [dispatch]);
   
     return (
-      <div className='app-header' style={{display: 'flex', flexDirection: 'column'}}>
-        <div style={{justifyContent: 'center', alignItems: 'center', textAlign: 'center'}}>
-          <h1>Craft Ye The Finest Studying Materials, {state.username}.</h1>
-          <p>You currently have {state.cards.length} cards in your box arranged into {state.decks.length} decks.</p>
-        </div>
-  
-        <div style={{display: 'flex', flexDirection: 'row'}}>
-          <button className='btn' onClick={() => history.push('/')}>Home</button>
-          <button className='btn' onClick={() => history.push('/user_preferences')}>User Stuff</button>
-          <button className='btn' onClick={() => history.push('/view_cards')}>My Cards</button>
-          <button className='btn' onClick={() => history.push('/view_decks')}>My Decks</button>        
-          <button className='btn' onClick={() => history.push('/modify_card')}>Card+</button>
-          <button className='btn' onClick={() => history.push('/modify_deck')}>Deck+</button>
-          <button className='btn' onClick={() => history.push('/session_setup')}>Study!</button>
-        </div>
-      </div>
+      <AppHeader className='app-header' style={{display: 'flex', flexDirection: 'column'}}>
+        <NavContainer>
+          <NavButton onClick={() => history.push('/')}>Home</NavButton>
+          <NavButton onClick={() => history.push('/session_setup')}>Study!</NavButton>
+          <NavButton onClick={() => history.push('/modify_card')}>Create Cards</NavButton>
+          <NavButton onClick={() => history.push('/view_cards')}>My Cards</NavButton>
+          <NavButton onClick={() => history.push('/modify_deck')}>Create Decks</NavButton>
+          <NavButton onClick={() => history.push('/view_decks')}>My Decks</NavButton>        
+          <NavButton onClick={() => history.push('/user_preferences')}>Settings</NavButton>
+        </NavContainer>
+      </AppHeader>
     )
 }
 

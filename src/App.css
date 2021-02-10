@@ -12,13 +12,6 @@
   background-color: #0AF;
 }
 
-.app-body {
-  display: flex;
-  height: 80vh;
-  justify-content: center;
-  align-items: center;
-}
-
 .btn {
   width: 200px;
   height: 100px;
