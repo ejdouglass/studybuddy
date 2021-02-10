@@ -55,7 +55,77 @@ export const ValueModifierButton = styled(Button)`
     font-size: 24px;
 `;
 
-export const InputContainer = styled.div`
+export const ContentContainer = styled.div`
+    display: flex;
+    align-items: center;
+    ${props => props.row && css`
+        flex-direction: row;
+    `}
+    ${props => props.column && css`
+        flex-direction: column;
+    `}
+    ${props => props.full && css`
+        width: 100%;
+    `}
+    ${props => props.wide && css`
+        width: 75%;
+    `}
+    ${props => props.half && css`
+        width: 50%;
+    `}
+    ${props => props.quarter && css`
+        width: 25%;
+    `}
+    ${props => props.tall && css`
+        height: 75vh;
+    `}
+    ${props => props.short && css`
+        height: 25vh;
+    `}
+    ${props => props.centered && css`
+        justify-content: center;
+    `}
+    ${props => props.cushioned && css`
+        justify-content: space-around;
+    `}
+    ${props => props.spaced && css`
+        justify-content: space-between;
+    `}
+`;
+
+export const DecksList = styled(ContentContainer)`
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-items: space-around;
+
+    padding: 12px;
+    width: 460px;
+    height: 50vh;
+    border: 2px solid hsla(230, 80%, 15%, 0.3);
+    border-radius: 6px;
+`;
+
+export const Deck = styled.div`
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    margin-right: 16px;
+    font-size: 24px;
+    box-shadow: 4px 8px 10px hsl(230, 80%, 30%), 8px 4px 10px hsl(230, 80%, 30%), 8px 8px 10px hsl(230, 80%, 30%);
+    padding: 6px 12px;
+    border-radius: 6px;
+    width: 200px;
+    height: 120px;
+    background-color: hsla(230, 40%, 60%, 1);
+    font-weight: 600;
+    border: 0;
+    color: white;
+`;
+
+export const InputContainer = styled(ContentContainer)`
     display: flex;
     align-items: center;
     ${props => props.row && css`
@@ -71,10 +141,6 @@ export const InputContainer = styled.div`
 
 export const SessionVariablesContainer = styled(InputContainer)`
     height: 50px;
-`;
-
-export const Select = styled.select`
-
 `;
 
 export const Input = styled.input`
@@ -99,7 +165,12 @@ export const Segment = styled.div`
 
 export const Title = styled.h1`
     font-size: 24px;
-    margin: 16px;
+    ${props => props.roomy && css`
+        margin: 16px;
+    `}
+    ${props => props.big && css`
+        font-size: 36px;
+    `}
 `;
 
 export const ButtonPrompt = styled.p`

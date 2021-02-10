@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { Title, PageContainer, ButtonPrompt, Button, Segment, SessionVariablesContainer, InputContainer, Input, Select, ValueModifierButton } from '../components/styles';
+import { Title, PageContainer, ButtonPrompt, Button, Segment, SessionVariablesContainer, ContentContainer, InputContainer, Input, ValueModifierButton, DecksList, Deck } from '../components/styles';
 
 const SessionSetup = () => {
     const [state, dispatch] = useContext(Context);
@@ -10,7 +10,8 @@ const SessionSetup = () => {
       decksToChoose: state.decks,
       decksToUse: [],
       sessionEndCondition: 'user',
-      sessionEndNumber: 5
+      sessionEndTime: 5,
+      sessionEndIterations: 3
     });
     const [deckSearch, setDeckSearch] = useState('');
     const history = useHistory();
@@ -31,10 +32,13 @@ const SessionSetup = () => {
     }
   
     function goStudy() {
+      let sessionEndNumber = 1;
+      if (sessionPrep.sessionEndCondition === 'time') sessionEndNumber = sessionPrep.sessionEndTime;
+      if (sessionPrep.sessionEndCondition === 'iterations') sessionEndNumber = sessionPrep.sessionEndIterations;
       const sessionData = {
         decks: [...sessionPrep.decksToUse],
         endWhen: sessionPrep.sessionEndCondition,
-        endAt: sessionPrep.sessionEndNumber
+        endAt: sessionEndNumber
       }
       if (sessionData.decks.length < 1) alert(`You gotta choose at least one deck there, chief.`)
       else history.push('/session_study', {sessionData: sessionData})
@@ -60,7 +64,7 @@ const SessionSetup = () => {
   
     return (
       <PageContainer>
-        <Title>Session Setup</Title>
+        <Title big>Session Setup</Title>
         
         {/* HERE: Menu for session deets  */}
         <div id='session-details-menu'>
@@ -78,26 +82,19 @@ const SessionSetup = () => {
             <SessionVariablesContainer>
               {sessionPrep.sessionEndCondition === 'time' &&
               <InputContainer wide row>
+                {/* Hm, makes more sense if we have 5 minute increments, do it like 'iterations' logic below */}
                 <ButtonPrompt>Set Time Limit</ButtonPrompt>
-                <Select value={sessionPrep.sessionEndNumber} onChange={e => setSessionPrep({...sessionPrep, sessionEndNumber: e.target.value})}>
-                  <option value={5}>5 min</option>
-                  <option value={10}>10 min</option>
-                  <option value={15}>15 min</option>
-                  <option value={20}>20 min</option>
-                  <option value={25}>25 min</option>
-                  <option value={30}>30 min</option>
-                  <option value={35}>35 min</option>
-                  <option value={40}>40 min</option>
-                  <option value={45}>45 min</option>
-                </Select>
+                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndTime: sessionPrep.sessionEndTime > 5 ? sessionPrep.sessionEndTime - 5 : 5})}>-</ValueModifierButton>
+                <Input centered type='text' readOnly={true} value={sessionPrep.sessionEndTime + ' minutes'} min={5} max={100}></Input>
+                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndTime: sessionPrep.sessionEndTime + 5})}>+</ValueModifierButton>
               </InputContainer>
               }
               {sessionPrep.sessionEndCondition === 'iterations' &&
               <InputContainer>
                 <ButtonPrompt>Set Iterations Limit</ButtonPrompt>
-                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndNumber: sessionPrep.sessionEndNumber > 1 ? sessionPrep.sessionEndNumber - 1 : 1})}>-</ValueModifierButton>
-                <Input centered type='text' readOnly={true} value={sessionPrep.sessionEndNumber} min={1} max={100}></Input>
-                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndNumber: sessionPrep.sessionEndNumber + 1})}>+</ValueModifierButton>
+                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndIterations: sessionPrep.sessionEndIterations > 1 ? sessionPrep.sessionEndIterations - 1 : 1})}>-</ValueModifierButton>
+                <Input centered type='text' readOnly={true} value={sessionPrep.sessionEndIterations + ' times through'} min={1} max={100}></Input>
+                <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndIterations: sessionPrep.sessionEndIterations + 1})}>+</ValueModifierButton>
               </InputContainer>
               }
               {sessionPrep.sessionEndCondition === 'user' &&
@@ -111,16 +108,17 @@ const SessionSetup = () => {
   
         </div>
   
-        <h2>Select Decks to Study With</h2>
-        <div id='session-cards-choose-menu'>
-          <div id='decks-to-choose' className='session-setup-decks'>
-            {sessionPrep.decksToChoose.map((deck, index) => (<button key={index} className='btn' onClick={() => addDeckToSession(deck)}>{deck.name}</button>))}
-          </div>
+        <Title>Select Decks to Study With</Title>
+        {/* HERE: Add deck search */}
+        <ContentContainer centered full tall>
+          <DecksList>
+            {sessionPrep.decksToChoose.map((deck, index) => (<Deck key={index} onClick={() => addDeckToSession(deck)}>{deck.name}</Deck>))}
+          </DecksList>
   
-          <div id='decks-to-use' className='session-setup-decks'>
-            {sessionPrep.decksToUse.map((deck, index) => (<button key={index} className='btn' onClick={() => removeDeckFromSession(deck)}>{deck.name}</button>))}
-          </div>
-        </div>
+          <DecksList>
+            {sessionPrep.decksToUse.map((deck, index) => (<Deck key={index} onClick={() => removeDeckFromSession(deck)}>{deck.name}</Deck>))}
+          </DecksList>
+        </ContentContainer>
   
         <button className='btn small-btn'>(({'<=='}ADD ALL VISIBLE DECKS BTN))</button>
   
