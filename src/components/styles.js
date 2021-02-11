@@ -22,7 +22,7 @@ export const Button = styled.button`
     font-size: 16px;
     padding: 6px 12px;
     border-radius: 6px;
-    width: 200px;
+    width: 150px;
     background-color: hsla(230, 40%, 60%, 1);
     font-weight: 600;
     border: 0;
@@ -46,6 +46,12 @@ export const Button = styled.button`
         border-radius: 0;
         border-right: 2px solid hsl(230, 80%, 20%);
     `}
+    ${props => props.tall && css`
+        height: 50px;
+    `}
+    ${props => props.tall && css`
+        background-color: hsla(340, 50%, 50%, 1);
+    `}
 `;
 
 export const ValueModifierButton = styled(Button)`
@@ -68,7 +74,7 @@ export const ContentContainer = styled.div`
         width: 100%;
     `}
     ${props => props.wide && css`
-        width: 75%;
+        width: 80%;
     `}
     ${props => props.half && css`
         width: 50%;
@@ -163,10 +169,20 @@ export const Segment = styled.div`
     `}
 `;
 
-export const Title = styled.h1`
+export const Title = styled.p`
     font-size: 24px;
     ${props => props.roomy && css`
         margin: 16px;
+    `}
+    ${props => props.headroom && css`
+        margin-top: 16px;
+    `}
+    ${props => props.footroom && css`
+        margin-bottom: 16px;
+    `}
+    ${props => props.elbowroom && css`
+        margin-left: 16px;
+        margin-right: 16px;
     `}
     ${props => props.big && css`
         font-size: 36px;
@@ -185,6 +201,7 @@ export const PageContainer = styled.div`
     width: 100vw;
     height: calc(100vh - 100px);
 `;
+
 
 export const NavButton = styled(Button)`
     width: 100px;

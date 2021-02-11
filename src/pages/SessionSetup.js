@@ -64,15 +64,13 @@ const SessionSetup = () => {
   
     return (
       <PageContainer>
-        <Title big>Session Setup</Title>
+        <Title big headroom footroom>Session Setup</Title>
         
         {/* HERE: Menu for session deets  */}
-        <div id='session-details-menu'>
-          
-          
+
+        <ContentContainer wide centered>
           <ButtonPrompt>Session ends when:</ButtonPrompt>
-          <div style={{display: 'flex', flexDirection: 'row', width: '80vw'}}>
-  
+          <ContentContainer wide row>
             <Segment half>
               <Button left selected={sessionPrep.sessionEndCondition === 'time'} onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'time'})}>I reach a time limit</Button>
               <Button segment selected={sessionPrep.sessionEndCondition === 'user'} onClick={() => setSessionPrep({...sessionPrep, sessionEndCondition: 'user'})}>I manually end the session</Button>
@@ -82,16 +80,15 @@ const SessionSetup = () => {
             <SessionVariablesContainer>
               {sessionPrep.sessionEndCondition === 'time' &&
               <InputContainer wide row>
-                {/* Hm, makes more sense if we have 5 minute increments, do it like 'iterations' logic below */}
-                <ButtonPrompt>Set Time Limit</ButtonPrompt>
+                <ButtonPrompt>Time Limit:</ButtonPrompt>
                 <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndTime: sessionPrep.sessionEndTime > 5 ? sessionPrep.sessionEndTime - 5 : 5})}>-</ValueModifierButton>
                 <Input centered type='text' readOnly={true} value={sessionPrep.sessionEndTime + ' minutes'} min={5} max={100}></Input>
                 <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndTime: sessionPrep.sessionEndTime + 5})}>+</ValueModifierButton>
               </InputContainer>
               }
               {sessionPrep.sessionEndCondition === 'iterations' &&
-              <InputContainer>
-                <ButtonPrompt>Set Iterations Limit</ButtonPrompt>
+              <InputContainer wide row>
+                <ButtonPrompt>Iterations:</ButtonPrompt>
                 <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndIterations: sessionPrep.sessionEndIterations > 1 ? sessionPrep.sessionEndIterations - 1 : 1})}>-</ValueModifierButton>
                 <Input centered type='text' readOnly={true} value={sessionPrep.sessionEndIterations + ' times through'} min={1} max={100}></Input>
                 <ValueModifierButton onClick={() => setSessionPrep({...sessionPrep, sessionEndIterations: sessionPrep.sessionEndIterations + 1})}>+</ValueModifierButton>
@@ -104,11 +101,13 @@ const SessionSetup = () => {
               }
             </SessionVariablesContainer>
   
-          </div>
+          </ContentContainer>
+
+          <Button tall action onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</Button>
   
-        </div>
+        </ContentContainer>
   
-        <Title>Select Decks to Study With</Title>
+        <Title headroom>Select Decks to Study With</Title>
         {/* HERE: Add deck search */}
         <ContentContainer centered full tall>
           <DecksList>
@@ -120,9 +119,9 @@ const SessionSetup = () => {
           </DecksList>
         </ContentContainer>
   
-        <button className='btn small-btn'>(({'<=='}ADD ALL VISIBLE DECKS BTN))</button>
+        
   
-        <button className='btn' onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</button>
+        
   
       </PageContainer>
     )

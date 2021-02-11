@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Store } from './context/context';
+import UserAlert from './pages/UserAlert';
 import Header from './components/Header';
 import Landing from './pages/Landing';
 import ModifyCard from './pages/ModifyCard';
@@ -18,6 +19,7 @@ const App = () => {
     <Store>
       <Router>
         <Header />
+        <UserAlert />
         <Route exact path='/' component={Landing} />
         <Route exact path='/modify_card' component={ModifyCard} />
         <Route exact path='/modify_deck' component={ModifyDeck} />
