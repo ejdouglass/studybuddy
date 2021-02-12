@@ -79,7 +79,8 @@ const initialState = {
     history: {},
     settings: {
         font: 'default'
-    }
+    },
+    alert: {type: 'info', message: '', startTime: undefined, duration: 0}
 }
 
 export const Context = createContext(initialState);

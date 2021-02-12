@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route } from 'react-router-dom';
 import { Store } from './context/context';
-import UserAlert from './pages/UserAlert';
+import UserAlert from './components/UserAlert';
 import Header from './components/Header';
 import Landing from './pages/Landing';
 import ModifyCard from './pages/ModifyCard';
