@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save, rando } from '../functions/globalfxns';
+import { Button } from '../components/styles';
 
 const ModifyCard = (props) => {
     const [state, dispatch] = useContext(Context);
@@ -108,7 +109,7 @@ const ModifyCard = (props) => {
         <label>Card Categories (as many as you'd like, separated by commas)</label>
         <div style={{display: 'flex', flexDirection: 'row'}}>
           <input type='text' style={{width: '50vw', padding: '10px'}} value={card.categories} onChange={e => setCard({...card, categories: e.target.value})}></input>
-          <button className='btn small-btn' style={{marginLeft: '10px'}} onClick={() => setCard({...card, categories: ''})}>Clear</button>
+          <Button  onClick={() => setCard({...card, categories: ''})}>Clear</Button>
         </div>
         <label>(Optional) Short Description of Card's Topic</label>
         <input type='text' style={{width: '50vw', padding: '10px'}} value={card.topic} onChange={e => setCard({...card, topic: e.target.value})}></input>
@@ -119,7 +120,7 @@ const ModifyCard = (props) => {
         <label>Back</label>
         <textarea className='create-card' value={card.back} rows='5' cols='50' onChange={e => setCard({...card, back: e.target.value})}></textarea>
   
-        <button className='btn' onClick={createNewCard}>{card.id ? 'Update Card' : 'Make New Card'}</button>
+        <Button tall action onClick={createNewCard}>{card.id ? 'Update Card' : 'Make New Card'}</Button>
   
       </div>
     )

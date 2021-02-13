@@ -13,7 +13,7 @@ const Landing = () => {
         type: 'info',
         message: 'WEE OOO WEE OOO WEE OOO',
         startTime: new Date(),
-        duration: 15
+        duration: 5
       };
       dispatch({type: actions.ALERT_USER, payload: newAlert});
     }

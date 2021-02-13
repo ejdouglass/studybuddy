@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { Title, PageContainer, ButtonPrompt, Button, Segment, SessionVariablesContainer, ContentContainer, InputContainer, Input, ValueModifierButton, DecksList, Deck } from '../components/styles';
+import { Title, PageContainer, ButtonPrompt, DeckSelectorMenu, Button, Segment, SessionVariablesContainer, ContentContainer, InputContainer, Input, ValueModifierButton, DecksList, Deck } from '../components/styles';
 
 const SessionSetup = () => {
     const [state, dispatch] = useContext(Context);
@@ -100,23 +100,26 @@ const SessionSetup = () => {
               </InputContainer>
               }
             </SessionVariablesContainer>
-  
+            
           </ContentContainer>
 
-          <Button tall action onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</Button>
+          
   
         </ContentContainer>
   
-        <Title headroom>Select Decks to Study With</Title>
         {/* HERE: Add deck search */}
         <ContentContainer centered full tall>
           <DecksList>
             {sessionPrep.decksToChoose.map((deck, index) => (<Deck key={index} onClick={() => addDeckToSession(deck)}>{deck.name}</Deck>))}
           </DecksList>
+
+          <DeckSelectorMenu></DeckSelectorMenu>
   
           <DecksList>
             {sessionPrep.decksToUse.map((deck, index) => (<Deck key={index} onClick={() => removeDeckFromSession(deck)}>{deck.name}</Deck>))}
           </DecksList>
+
+          <Button tall action onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</Button>
         </ContentContainer>
   
         

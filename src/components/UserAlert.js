@@ -5,6 +5,7 @@ import { Title, Button, AlertContainer } from '../components/styles';
 const UserAlert = () => {
     const [state, dispatch] = useContext(Context);
     const [alert, setAlert] = useState({duration: 0, type: 'info', message: ''});
+    const [alertStartTime, setAlertStartTime] = useState();
 
     /*
         WUT DO!
@@ -22,6 +23,7 @@ const UserAlert = () => {
         if (state.alert.duration > 0) {
             // create new local alert
             setAlert({...state.alert});
+            setAlertStartTime(new Date());
         }
         if (state.alert.duration === 0) {
             // a little clumsy, but works for now: when dismissed, global state's duration is set to 0, so we reset local state's as well
@@ -29,11 +31,25 @@ const UserAlert = () => {
         }
     }, [state.alert]);
 
+    useEffect(() =>{
+        if (alert.duration > 0) {
+            const timer = setTimeout(() => {
+                setAlert({...alert, duration: alert.duration - 1});    
+            }, 1000);
+                
+            
+            return () => clearTimeout(timer);
+        } else {
+            // Handle duration running out
+            dispatch({type: actions.DISMISS_ALERT});
+        }
+      }, [alert.duration]);
+
     return (
         <div>
             {alert.duration > 0 &&
             <AlertContainer>
-                <Title>{alert.message}</Title>
+                <Title>{alert.message} (for {alert.duration})</Title>
                 <Button onClick={() => dispatch({type: actions.DISMISS_ALERT})}>Dismiss Alert</Button>
             </AlertContainer>
             }

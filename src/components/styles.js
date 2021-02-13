@@ -61,7 +61,7 @@ export const Button = styled.button`
     ${props => props.tall && css`
         height: 50px;
     `}
-    ${props => props.tall && css`
+    ${props => props.action && css`
         background-color: hsla(340, 50%, 50%, 1);
     `}
 `;
@@ -116,13 +116,21 @@ export const DecksList = styled(ContentContainer)`
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-start;
-    justify-items: space-around;
+    
 
     padding: 12px;
+    margin: 12px;
     width: 460px;
     height: 50vh;
     border: 2px solid hsla(230, 80%, 15%, 0.3);
     border-radius: 6px;
+`;
+
+export const DeckSelectorMenu= styled(ContentContainer)`
+    display: flex;
+    flex-direction: column;
+    width: 200px;
+    height: 50vh;
 `;
 
 export const Deck = styled.div`
@@ -183,6 +191,7 @@ export const Segment = styled.div`
 
 export const Title = styled.p`
     font-size: 24px;
+    margin: 0;
     ${props => props.roomy && css`
         margin: 16px;
     `}
