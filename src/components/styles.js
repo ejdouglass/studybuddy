@@ -2,6 +2,18 @@ import styled, { keyframes, css } from 'styled-components';
 
 // Base color: hsla(230, 70%, 35%, 1)
 
+const materializeIn = keyframes`
+    from {
+        transform: translate(-5%, 0);
+        opacity: 0;
+    }
+
+    to {
+        transform: translate(0, 0);
+        opacity: 1;
+    }
+`;
+
 export const AppHeader = styled.div`
     display: flex;
     height: 100px;
@@ -211,4 +223,19 @@ export const NavButton = styled(Button)`
         color: white;
         transform: translateY(-1px);
     }
+`;
+
+export const AlertContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid hsla(240, 60%, 10%, 0.3);
+    position: fixed;
+    width: 40vw;
+    height: 150px;
+    left: 30vw;
+    bottom: 20px;
+    animation: ${materializeIn} 0.2s linear;
 `;
