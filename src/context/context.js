@@ -7,6 +7,7 @@ export const actions = {
     ADD_NEW_DECK: 'add_new_deck',
     EDIT_A_DECK: 'edit_a_deck',
     REMOVE_A_DECK: 'remove_a_deck',
+    ADD_NEW_SESSION: 'add_new_session',
     UPDATE_WHATDO: 'update_whatdo',
     LOAD_SAVED_DATA: 'load_saved_data',
     ALERT_USER: 'alert_user',
@@ -15,7 +16,6 @@ export const actions = {
   
 export const Reducer = (state, action) => {
     switch (action.type) {
-
         case actions.ADD_NEW_CARD:
             let newCardPile = [...state.cards, action.payload];
             return {...state, cards: newCardPile};
@@ -70,6 +70,10 @@ export const Reducer = (state, action) => {
         case actions.DISMISS_ALERT:
             return {...state, alert: {type: 'info', message: '', startTime: undefined, duration: 0}};
 
+        case actions.ADD_NEW_SESSION:
+            let newSessionCollection = [...state.sessions, action.payload];
+            return {...state, sessions: newSessionCollection};
+
         default:
             return state;
     }
@@ -99,7 +103,7 @@ export const Store = ({children}) => {
 
     return (
         <Context.Provider value={[state, dispatch]}>
-        {children}
+            {children}
         </Context.Provider>
     )
 }

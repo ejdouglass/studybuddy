@@ -61,8 +61,17 @@ export const Button = styled.button`
     ${props => props.tall && css`
         height: 50px;
     `}
+    ${props => props.huge && css`
+        height: 100px;
+        border-radius: 10px;
+        font-size: 18px;
+    `}
     ${props => props.action && css`
-        background-color: hsla(340, 50%, 50%, 1);
+        background-color: hsla(340, 60%, 50%, 1);
+    `}
+    ${props => props.grayed && css`
+        background-color: hsla(340, 60%, 50%, 0.6);
+        color: hsla(240, 30%, 100%, 0.9);
     `}
 `;
 
@@ -109,18 +118,22 @@ export const ContentContainer = styled.div`
     ${props => props.spaced && css`
         justify-content: space-between;
     `}
+    ${props => props.headroom && css`
+        margin-top: 16px;
+    `}
 `;
 
 export const DecksList = styled(ContentContainer)`
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    align-content: flex-start;
     align-items: flex-start;
     
 
     padding: 12px;
     margin: 12px;
-    width: 460px;
+    width: 480px;
     height: 50vh;
     border: 2px solid hsla(230, 80%, 15%, 0.3);
     border-radius: 6px;
@@ -138,13 +151,14 @@ export const Deck = styled.div`
     text-align: center;
     justify-content: center;
     align-items: center;
-    margin-right: 16px;
-    font-size: 24px;
+    margin-right: 12px;
+    margin-bottom: 16px;
+    font-size: 16px;
     box-shadow: 4px 8px 10px hsl(230, 80%, 30%), 8px 4px 10px hsl(230, 80%, 30%), 8px 8px 10px hsl(230, 80%, 30%);
     padding: 6px 12px;
     border-radius: 6px;
-    width: 200px;
-    height: 120px;
+    width: 100px;
+    height: 60px;
     background-color: hsla(230, 40%, 60%, 1);
     font-weight: 600;
     border: 0;
@@ -208,6 +222,12 @@ export const Title = styled.p`
     ${props => props.big && css`
         font-size: 36px;
     `}
+`;
+
+export const Text = styled.p`
+    font-size: 18px;
+    color: hsla(230, 70%, 25%, 1);
+    font-weight: 500;
 `;
 
 export const ButtonPrompt = styled.p`

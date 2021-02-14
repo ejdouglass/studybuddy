@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { Title, PageContainer, ButtonPrompt, DeckSelectorMenu, Button, Segment, SessionVariablesContainer, ContentContainer, InputContainer, Input, ValueModifierButton, DecksList, Deck } from '../components/styles';
+import { Title, PageContainer, ButtonPrompt, DeckSelectorMenu, Button, Text, Segment, SessionVariablesContainer, ContentContainer, InputContainer, Input, ValueModifierButton, DecksList, Deck } from '../components/styles';
 
 const SessionSetup = () => {
     const [state, dispatch] = useContext(Context);
@@ -108,6 +108,9 @@ const SessionSetup = () => {
         </ContentContainer>
   
         {/* HERE: Add deck search */}
+        <ContentContainer full centered headroom>
+          <Text>Deck Search: (_____) .. Deck Filter: bloop bloop</Text>
+        </ContentContainer>
         <ContentContainer centered full tall>
           <DecksList>
             {sessionPrep.decksToChoose.map((deck, index) => (<Deck key={index} onClick={() => addDeckToSession(deck)}>{deck.name}</Deck>))}
@@ -119,11 +122,13 @@ const SessionSetup = () => {
             {sessionPrep.decksToUse.map((deck, index) => (<Deck key={index} onClick={() => removeDeckFromSession(deck)}>{deck.name}</Deck>))}
           </DecksList>
 
-          <Button tall action onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'Choose 1+ Deck(s)'}</Button>
+          <Button huge action grayed={sessionPrep.decksToUse.length > 0 ? false : true} onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'CHOOSE 1+ DECK(S)'}</Button>
         </ContentContainer>
   
         
-  
+        <ContentContainer short centered full row style={{border: '1px solid gray'}}>
+          <Text>(Previously Extant Sessions here maybe)</Text>
+        </ContentContainer>
         
   
       </PageContainer>
