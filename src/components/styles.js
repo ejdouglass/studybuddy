@@ -189,6 +189,10 @@ export const Input = styled.input`
     ${props => props.centered && css`
         text-align: center;
     `}
+    ${props => props.elbowroom && css`
+        margin-left: 16px;
+        margin-right: 16px;
+    `}
 `;
 
 export const Segment = styled.div`

@@ -15,6 +15,7 @@ const SessionSetup = () => {
     });
     const [deckSearch, setDeckSearch] = useState('');
     const history = useHistory();
+
   
     function addDeckToSession(deck) {
       // THIS FXN: Take deck from Choose to Use, adjusting both
@@ -61,6 +62,15 @@ const SessionSetup = () => {
       // Whatdo will have a bit of challenge with this one!
       setSessionPrep({...sessionPrep, decksToChoose: state.decks});
     }, [state]);
+
+    useEffect(() => {
+      if (deckSearch === '') {
+        setSessionPrep({...sessionPrep, decksToChoose: state.decks});
+      } else {
+        let newDecks = state.decks.filter(deck => deck.name.toLowerCase().includes(deckSearch.toLowerCase()));
+        setSessionPrep({...sessionPrep, decksToChoose: newDecks});
+      }
+    }, [deckSearch]);
   
     return (
       <PageContainer>
@@ -109,25 +119,31 @@ const SessionSetup = () => {
   
         {/* HERE: Add deck search */}
         <ContentContainer full centered headroom>
-          <Text>Deck Search: (_____) .. Deck Filter: bloop bloop</Text>
+          <Text>Deck Search: </Text>
+          <Input elbowroom type='text' value={deckSearch} onChange={e => setDeckSearch(e.target.value)}></Input>
         </ContentContainer>
         <ContentContainer centered full tall>
           <DecksList>
             {sessionPrep.decksToChoose.map((deck, index) => (<Deck key={index} onClick={() => addDeckToSession(deck)}>{deck.name}</Deck>))}
           </DecksList>
 
-          <DeckSelectorMenu></DeckSelectorMenu>
+          <DeckSelectorMenu>
+            {/* Mostly arrow over boopy show */}
+          </DeckSelectorMenu>
   
           <DecksList>
             {sessionPrep.decksToUse.map((deck, index) => (<Deck key={index} onClick={() => removeDeckFromSession(deck)}>{deck.name}</Deck>))}
           </DecksList>
 
-          <Button huge action grayed={sessionPrep.decksToUse.length > 0 ? false : true} onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'CHOOSE 1+ DECK(S)'}</Button>
+          <Button huge action grayed={sessionPrep.decksToUse.length > 0 ? false : true} onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'CHOOSE 1+ DECK(S) TO PROCEED'}</Button>
         </ContentContainer>
   
         
         <ContentContainer short centered full row style={{border: '1px solid gray'}}>
-          <Text>(Previously Extant Sessions here maybe)</Text>
+          {state.sessions?.map((session, index) => (
+            <Button>{session.name}</Button>
+          ))}
+          {!state.sessions.length && <Text>Alas, you have no currently saved sessions.</Text>}
         </ContentContainer>
         
   
