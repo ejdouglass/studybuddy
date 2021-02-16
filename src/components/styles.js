@@ -264,6 +264,7 @@ export const AlertContainer = styled.div`
     justify-content: center;
     align-items: center;
     padding: 16px;
+    background-color: hsl(240, 5%, 100%);
     border: 1px solid hsla(240, 60%, 10%, 0.3);
     position: fixed;
     width: 40vw;

@@ -41,7 +41,15 @@ const SessionSetup = () => {
         endWhen: sessionPrep.sessionEndCondition,
         endAt: sessionEndNumber
       }
-      if (sessionData.decks.length < 1) alert(`You gotta choose at least one deck there, chief.`)
+      if (sessionData.decks.length < 1) {
+        const pleasePickOneMsg = {
+          type: 'error',
+          message: `You've got to pick at least one deck to work with there, cap'n.`,
+          duration: 10
+        }
+        dispatch({type: actions.ALERT_USER, payload: pleasePickOneMsg});
+        return;
+      }
       else history.push('/session_study', {sessionData: sessionData})
     }
   

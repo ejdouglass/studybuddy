@@ -115,13 +115,26 @@ const SessionStudy = (props) => {
   
     useEffect(() => {
       const session = JSON.parse(JSON.stringify(props.location.state.sessionData));
-      let sessionCards = [];
-      // COULD potentially throw the 'mastery' var for the card on each here, initialized to 0... ok, let's try that.
-      // session.decks.forEach(deck => deck.cards.forEach(card => sessionCards.push(card))); // 'old' way
+      let rawSessionCards = [];
+
       session.decks.forEach(deck => deck.cards.forEach(card => {
         card.mastery = 0;
-        sessionCards.push(card);
+        rawSessionCards.push(card);
       }));
+
+      // HERE: Brutally eliminate duplicate cards :P Alas, the new Set approach isn't doing the job. Let's try another way! ... still nope.
+      let sessionCards = [];
+      rawSessionCards.forEach(card => {
+        let addThisCard = true;
+        sessionCards.forEach(trueCard => {
+          if (trueCard.id === card.id) addThisCard = false;
+        });
+        if (addThisCard) sessionCards.push(card);
+      });
+
+      // HERE: Parse the decks down to just their names at this point, don't need the entire decks anymore
+
+
       sessionCards.sort(() => Math.random() - 0.5);
       setSessionData({...sessionData, 
         decks: session.decks.map(deck => deck.id), 
@@ -222,7 +235,7 @@ const SessionStudy = (props) => {
         <div>
           <h1>Study Session OVER!</h1>
           <h2>Results: You did it.</h2>
-          {/* HERE: Display more session data */}
+          {/* HERE: Display more session data, as well as relevant options */}
         </div>
         }
   
