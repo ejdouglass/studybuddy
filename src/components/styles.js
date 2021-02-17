@@ -73,6 +73,10 @@ export const Button = styled.button`
         background-color: hsla(340, 60%, 50%, 0.6);
         color: hsla(240, 30%, 100%, 0.9);
     `}
+    ${props => props.elbowroom && css`
+        margin-left: 8px;
+        margin-right: 8px;
+    `}
 `;
 
 export const ValueModifierButton = styled(Button)`

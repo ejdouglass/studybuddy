@@ -52,6 +52,11 @@ const SessionSetup = () => {
       }
       else history.push('/session_study', {sessionData: sessionData})
     }
+
+    function launchSavedSession(session) {
+      // Playing fast and loose with this; might have to amend the session object details before passing it
+      history.push('/session_study', {sessionData: session});
+    }
   
     /*
       For this component...
@@ -149,7 +154,7 @@ const SessionSetup = () => {
         
         <ContentContainer short centered full row style={{border: '1px solid gray'}}>
           {state.sessions?.map((session, index) => (
-            <Button>{session.name}</Button>
+            <Button tall elbowroom onClick={() => launchSavedSession(session)}>{session.name}</Button>
           ))}
           {!state.sessions.length && <Text>Alas, you have no currently saved sessions.</Text>}
         </ContentContainer>

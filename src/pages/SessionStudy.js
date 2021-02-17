@@ -1,5 +1,8 @@
 import React, { useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { Context } from '../context/context';
+import { useHistory } from 'react-router-dom';
+import { Context, actions } from '../context/context';
+import { Title, Text, Button, Input, ContentContainer } from '../components/styles';
+import { rando, save } from '../functions/globalfxns';
 
 const SessionStudy = (props) => {
     /*
@@ -13,6 +16,7 @@ const SessionStudy = (props) => {
     */
   
     const [state, dispatch] = useContext(Context);
+    const history = useHistory();
     const [sessionData, setSessionData] = useState({
       startTime: undefined,
       timeElapsed: 0,
@@ -36,6 +40,7 @@ const SessionStudy = (props) => {
       s: false,
       f: false
     });
+    const [newSessionName, setNewSessionName] = useState('');
     const answerRef = useRef(null);
     const keyDownCB = useCallback(keyEvent => {
       handleKeyDown(keyEvent);
@@ -48,7 +53,7 @@ const SessionStudy = (props) => {
       // e.preventDefault(); // This is fighting with other stuff I want the user to be able to do, so cutting it for noooow...
       // UPDATE: Yeah, we need a separate MODE CHECK here that's activated when the user is giving an answer :P
   
-      if (!keysDown.current[e.key] && document.activeElement !== answerRef.current) {
+      if (!keysDown.current[e.key] && document.activeElement !== answerRef.current && !sessionData.finished) {
         e.preventDefault();
         keysDown.current[e.key] = true;
         if (keysDown.current.f) flipCurrentCard();
@@ -107,22 +112,60 @@ const SessionStudy = (props) => {
       sessionCards[sessionData.currentCardIndex].answer = value;
       setSessionData({...sessionData, cards: sessionCards});
     }
+
+    function saveSession() {
+      if (newSessionName.length < 1) {
+        dispatch({type: actions.ALERT_USER, payload: {type: 'error', message: `Please enter a name for your new session.`, duration: 10}});
+        return;
+      }
+
+      let dateSeed = new Date();
+
+      const session = {
+        name: newSessionName,
+        id: '' + dateSeed.getFullYear() + '' + dateSeed.getMonth() + '' + dateSeed.getDate() + '' + dateSeed.getDay() + '' + dateSeed.getHours() + '' + dateSeed.getMinutes() + '' + rando(0,9) + '' + rando(0,9) + '' + rando(0,9) + '' + rando(0,9) + '',
+        decks: [...sessionData.decks],
+        cards: [...sessionData.cards],
+        endWhen: sessionData.endWhen,
+        endAt: sessionData.endAt
+      }
+      dispatch({type: actions.ADD_NEW_SESSION, payload: session});
+      dispatch({type: actions.ALERT_USER, payload: {type: 'info', message: `You've saved a new session! Back to setup page!`, duration: 10}});
+      history.push('/session_setup');
+    }
   
+
     useEffect(() => {
       if (sessionData.endWhen === 'iterations' && sessionData.iterations >= sessionData.endAt) finishSession()
       else setSessionData({...sessionData, currentCardIndex: 0});
     }, [sessionData.iterations]);
   
+
     useEffect(() => {
       const session = JSON.parse(JSON.stringify(props.location.state.sessionData));
+
+      if (session?.name) {
+        // If the session has a name, it's loaded from a previously saved session, so skip the 'initial load' logic below
+        setSessionData({...sessionData,
+          name: session.name,
+          startTime: new Date(),
+          decks: [...session.decks],
+          cards: [...session.cards],
+          endWhen: session.endWhen,
+          endAt: session.endAt
+        });
+        return;
+      }
+
       let rawSessionCards = [];
 
+      // Setting a new session-specific attribute, card.mastery, to each card before pushing them into the preliminary final array
       session.decks.forEach(deck => deck.cards.forEach(card => {
         card.mastery = 0;
         rawSessionCards.push(card);
       }));
 
-      // HERE: Brutally eliminate duplicate cards :P Alas, the new Set approach isn't doing the job. Let's try another way! ... still nope.
+      // Brutally removing duplicate cards; the rawSessionCards are all cards from combined decks, sessionCards is minus duplicates
       let sessionCards = [];
       rawSessionCards.forEach(card => {
         let addThisCard = true;
@@ -131,8 +174,6 @@ const SessionStudy = (props) => {
         });
         if (addThisCard) sessionCards.push(card);
       });
-
-      // HERE: Parse the decks down to just their names at this point, don't need the entire decks anymore
 
 
       sessionCards.sort(() => Math.random() - 0.5);
@@ -177,6 +218,11 @@ const SessionStudy = (props) => {
         window.removeEventListener('keyup', keyUpCB);
       }
     }, [keyDownCB, keyUpCB]);
+
+    useEffect(() => {
+      // This awkwardly runs on the first load, which I can adjust/fix later
+      save(state);
+    }, [state]);
   
     // Add in conditional rendering for the param data; if not found, offer to redirect user back to set them up
     return (
@@ -232,11 +278,25 @@ const SessionStudy = (props) => {
         }
   
         {sessionData.finished && 
-        <div>
-          <h1>Study Session OVER!</h1>
-          <h2>Results: You did it.</h2>
+        <ContentContainer column centered full>
+          <Title>Study Session OVER!</Title>
+          {!sessionData.name &&
+          <>
+            <Text>Like this setup? Name this Study Session Setup and save it again for later.</Text>
+            <Input type='text' value={newSessionName} onChange={e => setNewSessionName(e.target.value)}></Input>
+            <Button onClick={saveSession}>Save Session</Button> 
+          </>
+          }
+          {sessionData.name &&
+          <>
+            <Text>You finished this session! Neat!</Text>
+            <Button onClick={() => history.push('/session_setup')}>Back to Setup</Button>
+          </>
+          }
+
+          
           {/* HERE: Display more session data, as well as relevant options */}
-        </div>
+        </ContentContainer>
         }
   
       </div>
