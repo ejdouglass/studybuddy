@@ -34,7 +34,7 @@ const UserAlert = () => {
     useEffect(() =>{
         if (alert.duration > 0) {
             const timer = setTimeout(() => {
-                setAlert({...alert, duration: alert.duration - 1});    
+                setAlert({...alert, duration: alert.duration - 1});
             }, 1000);
                 
             
@@ -46,14 +46,14 @@ const UserAlert = () => {
       }, [alert.duration]);
 
     return (
-        <div>
+        <>
             {alert.duration > 0 &&
             <AlertContainer>
                 <Title>{alert.message} (for {alert.duration})</Title>
                 <Button onClick={() => dispatch({type: actions.DISMISS_ALERT})}>Dismiss Alert</Button>
             </AlertContainer>
             }
-        </div>
+        </>
     )
 }
 

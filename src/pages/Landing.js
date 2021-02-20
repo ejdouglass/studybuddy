@@ -2,7 +2,7 @@ import React, { useEffect, useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { Button } from '../components/styles';
+import { PageContainer, Button, Title, Text } from '../components/styles';
 
 const Landing = () => {
     const [state, dispatch] = useContext(Context);
@@ -11,7 +11,7 @@ const Landing = () => {
     function alertTest() {
       const newAlert = {
         type: 'info',
-        message: 'WEE OOO WEE OOO WEE OOO',
+        message: 'Test alert',
         startTime: new Date(),
         duration: 5
       };
@@ -27,13 +27,13 @@ const Landing = () => {
     }, [state]);
   
     return (
-      <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-        <h1>Hiya! This is the Landing Page. Nothing much going on here yet. Under Construction, I suppose!</h1>
-        <h2>You currently have {state.cards.length} cards in your box.</h2>
-        <h2>You've made {state.decks.length} decks out of these.</h2>
+      <PageContainer>
+        <Title roomy>Welcome to your Landing Page. Working on content for this bit.</Title>
+        <Text>You currently have {state.cards.length} cards in your box.</Text>
+        <Text>You've made {state.decks.length} decks out of these.</Text>
 
-        <Button onClick={alertTest}>Boop an Alert!</Button>
-      </div>
+        <Button wide onClick={alertTest}>(Test Alert System)</Button>
+      </PageContainer>
     )
 }
 

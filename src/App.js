@@ -42,8 +42,6 @@ export default App;
   
   DEV
   -- Add way to toggle timer. Can set default "timer visible" or "timer hidden" as a user pref.
-  -- Add way to save session, either before launching it or after running it (results page).
-  -- Space to write 'answer' when studying
 
   DESIGN
   -- Make it LESS UGLY, holy crap. Page by page, identify the working elements and have at it. Resize fonts, as well.

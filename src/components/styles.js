@@ -2,9 +2,14 @@ import styled, { keyframes, css } from 'styled-components';
 
 // Base color: hsla(230, 70%, 35%, 1)
 
+const colors = {
+    base: 'hsla(230, 70%, 35%, 1)',
+    blackish: 'hsla(230, 70%, 25%, 1)'
+}
+
 const materializeIn = keyframes`
     from {
-        transform: translate(-5%, 0);
+        transform: translate(0, 5%);
         opacity: 0;
     }
 
@@ -76,6 +81,12 @@ export const Button = styled.button`
     ${props => props.elbowroom && css`
         margin-left: 8px;
         margin-right: 8px;
+    `}
+    ${props => props.roomy && css`
+        margin: 8px;
+    `}
+    ${props => props.wide && css`
+        width: 300px;
     `}
 `;
 
@@ -188,14 +199,26 @@ export const SessionVariablesContainer = styled(InputContainer)`
 `;
 
 export const Input = styled.input`
-    font-size: 18px;
-    padding: 12px 16px;
+    font-size: 1.1rem;
+    color: ${colors.blackish};
+    padding: 0.8rem 1rem;
+    width: 200px;
     ${props => props.centered && css`
         text-align: center;
     `}
     ${props => props.elbowroom && css`
         margin-left: 16px;
         margin-right: 16px;
+    `}
+    ${props => props.elbowroom && css`
+        margin-left: 16px;
+        margin-right: 16px;
+    `}
+    ${props => props.wide && css`
+        width: 400px;
+    `}
+    ${props => props.doublewide && css`
+        width: 600px;
     `}
 `;
 
@@ -212,8 +235,11 @@ export const Segment = styled.div`
 `;
 
 export const Title = styled.p`
-    font-size: 24px;
+    font-size: 1.5rem;
+    font-weight: 600;
     margin: 0;
+    text-align: center;
+    color: ${colors.blackish};
     ${props => props.roomy && css`
         margin: 16px;
     `}
@@ -233,19 +259,20 @@ export const Title = styled.p`
 `;
 
 export const Text = styled.p`
-    font-size: 18px;
-    color: hsla(230, 70%, 25%, 1);
+    font-size: 1.1rem;
+    line-height: 1.5;
+    color: ${colors.blackish};
     font-weight: 500;
 `;
 
-export const ButtonPrompt = styled.p`
-    font-size: 18px;
+export const ButtonPrompt = styled(Text)`
     margin: 12px;
 `;
 
 export const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
+    padding: 0.8rem;
     align-items: center;
     width: 100vw;
     height: calc(100vh - 100px);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save, rando } from '../functions/globalfxns';
-import { Button } from '../components/styles';
+import { PageContainer, ContentContainer, Button, Input, Title, Text } from '../components/styles';
 
 const ModifyCard = (props) => {
     const [state, dispatch] = useContext(Context);
@@ -103,26 +103,27 @@ const ModifyCard = (props) => {
     }, [props.location.state?.cardData]);
   
     return (
-      <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-evenly', alignItems: 'center'}}>
-        <h1 style={{color: feedback.type === 'error' ? 'red' : 'black', textAlign: 'center', padding: '10px'}}>{feedback.message}</h1>
+      <PageContainer>
+        <Title roomy>Note Up a New Card</Title>
   
-        <label>Card Categories (as many as you'd like, separated by commas)</label>
-        <div style={{display: 'flex', flexDirection: 'row'}}>
-          <input type='text' style={{width: '50vw', padding: '10px'}} value={card.categories} onChange={e => setCard({...card, categories: e.target.value})}></input>
-          <Button  onClick={() => setCard({...card, categories: ''})}>Clear</Button>
-        </div>
-        <label>(Optional) Short Description of Card's Topic</label>
-        <input type='text' style={{width: '50vw', padding: '10px'}} value={card.topic} onChange={e => setCard({...card, topic: e.target.value})}></input>
+        <Text>Card Categories (as many as you'd like, separated by commas)</Text>
+        <ContentContainer row>
+          <Input type='text' doublewide value={card.categories} onChange={e => setCard({...card, categories: e.target.value})}></Input>
+          <Button tall elbowroom onClick={() => setCard({...card, categories: ''})}>Clear</Button>
+        </ContentContainer>
+
+        <Text>(Optional) Short Description of Card's Topic</Text>
+        <Input type='text' wide value={card.topic} onChange={e => setCard({...card, topic: e.target.value})}></Input>
   
-        <label>Front</label>
+        <Text>Front</Text>
         <textarea className='create-card' ref={focusRef} value={card.front} rows='3' cols='50' onChange={e => setCard({...card, front: e.target.value})}></textarea>
   
-        <label>Back</label>
+        <Text>Back</Text>
         <textarea className='create-card' value={card.back} rows='5' cols='50' onChange={e => setCard({...card, back: e.target.value})}></textarea>
   
-        <Button tall action onClick={createNewCard}>{card.id ? 'Update Card' : 'Make New Card'}</Button>
+        <Button roomy tall action onClick={createNewCard}>{card.id ? 'Update Card' : 'Make New Card'}</Button>
   
-      </div>
+      </PageContainer>
     )
 }
 
