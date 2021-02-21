@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
+import { PageContainer, ContentContainer, Button, Title, Text, Input } from '../components/styles';
 
 const ViewCards = () => {
     const [state, dispatch] = useContext(Context);
@@ -69,40 +70,41 @@ const ViewCards = () => {
     }, [deletionDetails.confirmDelete]);
   
     return (
-      <div className='flex-centered flex-col'>
+      <PageContainer>
   
         {deletionDetails.card?.id &&
-        <div className='flex-centered flex-col'>
-          <h1>Are you sure you want to delete this card?</h1>
-          <div className='flex-centered flex-row'>
-            <button className='btn small-btn' onClick={() => setDeletionDetails({...deletionDetails, confirmDelete: true})}>Yep</button>
-            <button className='btn small-btn' onClick={() => setDeletionDetails({...deletionDetails, card: {}})}>Nah</button>
-          </div>
-        </div>
+        <ContentContainer column centered>
+          <Title>Are you sure you want to delete this card?</Title>
+          <ContentContainer row centered>
+            <Button onClick={() => setDeletionDetails({...deletionDetails, confirmDelete: true})}>Yep</Button>
+            <Button onClick={() => setDeletionDetails({...deletionDetails, card: {}})}>Nah</Button>
+          </ContentContainer>
+        </ContentContainer>
         }
   
         <div className='flex-centered flex-row' style={{width: '90vw', justifyContent: 'space-around', border: '1px solid black'}}>
-          <p>Search and Mod Cards</p>
-          <div>
-            <label>Search: </label>
-            <input style={{height: '40px', fontSize: '30px'}} type='text' value={search} onChange={e => setSearch(e.target.value)}></input>
-          </div>
+          <Text>Search and Mod Cards</Text>
+          <ContentContainer>
+            <Text>Search: </Text>
+            <Input type='text' value={search} onChange={e => setSearch(e.target.value)}></Input>
+          </ContentContainer>
   
-          <div>
-            <label>Search Areas: </label>
-            <button className='btn small-btn' style={{backgroundColor: filter.front ? 'green' : 'red'}} onClick={() => setFilter({...filter, front: !filter.front})} >Front</button>
-            <button className='btn small-btn' style={{backgroundColor: filter.back ? 'green' : 'red'}} onClick={() => setFilter({...filter, back: !filter.back})}   >Back</button>
-            <button className='btn small-btn' style={{backgroundColor: filter.categories ? 'green' : 'red'}} onClick={() => setFilter({...filter, categories: !filter.categories})}   >Categories</button>
-            <button className='btn small-btn' style={{backgroundColor: filter.description ? 'green' : 'red'}} onClick={() => setFilter({...filter, description: !filter.description})}  >Description</button>
-          </div>
+          <ContentContainer>
+            <Text>Search Areas: </Text>
+            <Button style={{backgroundColor: filter.front ? 'green' : 'red'}} onClick={() => setFilter({...filter, front: !filter.front})} >Front</Button>
+            <Button style={{backgroundColor: filter.back ? 'green' : 'red'}} onClick={() => setFilter({...filter, back: !filter.back})}   >Back</Button>
+            <Button style={{backgroundColor: filter.categories ? 'green' : 'red'}} onClick={() => setFilter({...filter, categories: !filter.categories})}   >Categories</Button>
+            <Button style={{backgroundColor: filter.description ? 'green' : 'red'}} onClick={() => setFilter({...filter, description: !filter.description})}  >Description</Button>
+          </ContentContainer>
           
         </div>
-        <div className='cards-list-holder'>
+
+        <ContentContainer className='cards-list-holder'>
           {viewedCards.map((card, index) => (
           <CardPreview card={card} key={index} deleteCard={deleteCard} history={history}/>
           ))}
-        </div>
-      </div>
+        </ContentContainer>
+      </PageContainer>
     )
 }
 
