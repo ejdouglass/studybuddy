@@ -1,6 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
+import { PageContainer, Title, Button, Input } from '../components/styles';
 
 const UserPreferences = () => {
     const [state, dispatch] = useContext(Context);
@@ -49,26 +50,21 @@ const UserPreferences = () => {
     }, [appDataString]);
   
     return (
-      <div className='flex-centered flex-col' style={{height: '100%', justifyContent: 'space-around'}}>
-        <h1>User Preferences</h1>
-        <div>
-          <button className='btn small-btn'>CLEAR APP DATA</button>
-        </div>
+      <PageContainer>
+        <Title>User Preferences</Title>
+        
+        <Button className='btn small-btn'>CLEAR APP DATA</Button>
+
+        <Input type='file' id='file-selector' accept='.txt' onChange={e => setLoaderFile(e.target.files)} ></Input>
+        
+        <textarea id='text-app-data' value={JSON.stringify(state)} style={{resize: 'none', width: '40vw', height: '300px', border: '1px solid black'}} readOnly={true}></textarea>
   
-        <div>
-          <input type='file' id='file-selector' accept='.txt' onChange={e => setLoaderFile(e.target.files)} ></input>
-        </div>
-  
-        <div>
-          <textarea id='text-app-data' value={JSON.stringify(state)} style={{resize: 'none', width: '40vw', height: '300px', border: '1px solid black'}} readOnly={true}></textarea>
-        </div>
-        <div>
-          <button className='btn small-btn' onClick={copyData}>Copy App Data to Clipboard</button>
-        </div>
-        <div>
-          <button className='btn small-btn' onClick={saveDataToFile}>Save App Data as .txt File</button>
-        </div>
-      </div>
+      
+        <Button roomy className='btn small-btn' onClick={copyData}>Copy App Data to Clipboard</Button>
+
+        <Button className='btn small-btn' onClick={saveDataToFile}>Save App Data as .txt File</Button>
+
+      </PageContainer>
     )
 }
 

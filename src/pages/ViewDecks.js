@@ -2,6 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
+import { PageContainer, Title, ContentContainer, Button } from '../components/styles';
 
 const ViewDecks = () => {
     const [state, dispatch] = useContext(Context);
@@ -15,14 +16,14 @@ const ViewDecks = () => {
     }, [state]);
   
     return (
-      <div>
-        <h1>Your Decks</h1>
-        <div className='decks-list-holder'>
+      <PageContainer>
+        <Title>Your Decks</Title>
+        <ContentContainer className='decks-list-holder'>
           {state.decks.map((deck, index) => (
             <DeckPreview key={index} deck={deck} dispatch={dispatch} />
           ))}
-        </div>
-      </div>
+        </ContentContainer>
+      </PageContainer>
     )
 }
   
@@ -42,15 +43,15 @@ const DeckPreview = (props) => {
           Cards: {deck.cards.length}
         </div>
         <div style={{visibility: selected ? 'visible' : 'hidden', flex: '1'}}>
-          <button>Peep</button>
-          <button onClick={() => history.push('/modify_deck', {deckData: deck})}>Edit</button>
-          <button onClick={() => setDeleteCandidate(true)}>Delete</button>
+          <Button>Peep</Button>
+          <Button onClick={() => history.push('/modify_deck', {deckData: deck})}>Edit</Button>
+          <Button onClick={() => setDeleteCandidate(true)}>Delete</Button>
         </div>
         {deleteCandidate &&
         <div style={{flex: '1'}}>
           <div> Are you sure you want to delete this deck? </div>
-          <button onClick={() => dispatch({type: actions.REMOVE_A_DECK, payload: deck.id})}>Yep</button>
-          <button onClick={() => setDeleteCandidate(false)}>Nah</button>
+          <Button onClick={() => dispatch({type: actions.REMOVE_A_DECK, payload: deck.id})}>Yep</Button>
+          <Button onClick={() => setDeleteCandidate(false)}>Nah</Button>
         </div>  
         }
       </div>

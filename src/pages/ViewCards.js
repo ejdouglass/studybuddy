@@ -116,13 +116,13 @@ const CardPreview = (props) => {
     return (
       <div className='card-preview' onMouseEnter={() => setOptionsVisible(true)} onMouseLeave={() => setOptionsVisible(false)}>
         <div style={{flex: 3}}>
-          <p style={{fontSize: '24px', fontWeight: '700'}}>{card.front}</p>
+          <Text>{card.front}</Text>
         </div>
         
         <div style={{visibility: optionsVisible ? 'visible' : 'hidden', flex: 1}}>
-          <button>Peep</button>
-          <button onClick={() => deleteCard(card)}>Delete</button>
-          <button onClick={() => props.history.push('/modify_card', {cardData: card})}>Edit</button>
+          <Button>Peep</Button>
+          <Button onClick={() => deleteCard(card)}>Delete</Button>
+          <Button onClick={() => props.history.push('/modify_card', {cardData: card})}>Edit</Button>
         </div>
   
       </div>
