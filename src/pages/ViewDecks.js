@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { PageContainer, Title, ContentContainer, Button } from '../components/styles';
+import { PageContainer, Text, Title, BigDeck, Button, DeckCollection, RowContainer } from '../components/styles';
 
 const ViewDecks = () => {
     const [state, dispatch] = useContext(Context);
@@ -17,12 +17,12 @@ const ViewDecks = () => {
   
     return (
       <PageContainer>
-        <Title>Your Decks</Title>
-        <ContentContainer className='decks-list-holder'>
+        <Title headroom>Your Decks</Title>
+        <DeckCollection>
           {state.decks.map((deck, index) => (
             <DeckPreview key={index} deck={deck} dispatch={dispatch} />
           ))}
-        </ContentContainer>
+        </DeckCollection>
       </PageContainer>
     )
 }
@@ -35,26 +35,30 @@ const DeckPreview = (props) => {
     const [deleteCandidate, setDeleteCandidate] = useState(false);
   
     return (
-      <div className='deck-preview flex flex-row' onMouseEnter={() => setSelected(true)} onMouseLeave={() => setSelected(false)}>
-        <div style={{fontSize: '24px', fontWeight: '600', flex: '1', border: '1px solid blue'}}>
-          {deck.name}
-        </div>
-        <div style={{fontSize: '24px', fontWeight: '600', flex: '1'}}>
+      <BigDeck onMouseEnter={() => setSelected(true)} onMouseLeave={() => setSelected(false)}>
+        <Title white roomy>{deck.name}</Title>
+        <Title white>
           Cards: {deck.cards.length}
-        </div>
-        <div style={{visibility: selected ? 'visible' : 'hidden', flex: '1'}}>
-          <Button>Peep</Button>
-          <Button onClick={() => history.push('/modify_deck', {deckData: deck})}>Edit</Button>
-          <Button onClick={() => setDeleteCandidate(true)}>Delete</Button>
-        </div>
-        {deleteCandidate &&
-        <div style={{flex: '1'}}>
-          <div> Are you sure you want to delete this deck? </div>
-          <Button onClick={() => dispatch({type: actions.REMOVE_A_DECK, payload: deck.id})}>Yep</Button>
-          <Button onClick={() => setDeleteCandidate(false)}>Nah</Button>
-        </div>  
+        </Title>
+
+        {(selected && !deleteCandidate) ? (
+          <RowContainer>
+            <Button onClick={() => history.push('/modify_deck', {deckData: deck})}>View/Edit</Button>
+            <Button onClick={() => setDeleteCandidate(true)}>Delete</Button>
+          </RowContainer>
+          ) : (
+            <RowContainer style={{height: '3.1rem'}}></RowContainer>
+          )
         }
-      </div>
+
+        {deleteCandidate &&
+          <>
+            <Text>Are you sure you want to delete this deck?</Text>
+            <Button action onClick={() => dispatch({type: actions.REMOVE_A_DECK, payload: deck.id})}>DELETE</Button>
+            <Button onClick={() => setDeleteCandidate(false)}>No, Leave It</Button>
+          </>  
+        }
+      </BigDeck>
     )
 }
 

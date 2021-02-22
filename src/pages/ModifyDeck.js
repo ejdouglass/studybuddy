@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Context, actions } from '../context/context';
 import { save, rando } from '../functions/globalfxns';
-import { PageContainer, RowContainer, Button, Title, Input, Text } from '../components/styles';
+import { PageContainer, RowContainer, Button, Title, Input, Text, CardCollection } from '../components/styles';
 
 const ModifyDeck = (props) => {
     const [state, dispatch] = useContext(Context);
@@ -38,7 +38,6 @@ const ModifyDeck = (props) => {
   
     function createDeck() {
       let errorMessage = '';
-      if (!deck.name) errorMessage += `Please name the deck. `;
       if (!deck.cards.length) errorMessage += `A deck should have at least one card in it. `;
       if (errorMessage) {
         // Nada - change to ALERT_USER dispatching
@@ -75,8 +74,11 @@ const ModifyDeck = (props) => {
         let newDeck = JSON.parse(JSON.stringify(deck));
         newDeck.creationTime = creationTime;
         newDeck.id = creationID;
+        if (newDeck.name.length === 0) newDeck.name = `My Study Deck #${state.decks.length + 1}`;
   
-        dispatch({type: actions.ADD_NEW_DECK, payload: newDeck});
+        dispatch({type: actions.ADD_NEW_DECK, payload: newDeck})
+
+        dispatch({type: actions.ALERT_USER, payload: {type: 'info', message: `${newDeck.name} created successfully!`, duration: 10}})
   
         setDeck({
           name: '',
@@ -86,8 +88,11 @@ const ModifyDeck = (props) => {
           id: undefined,
           creationTime: undefined
         });
+        setSearchbar(``);
+
         
-        // Removed another setFeedback here -- change to dispatch
+        
+        // Removed another setFeedback here -- change to dispatch; DECK CREATED feedback
       }
     }
   
@@ -127,26 +132,29 @@ const ModifyDeck = (props) => {
         <RowContainer>
           
           <Text>Name of Deck:</Text>
-          <Input type='text' placeholder={'Name of Deck'} value={deck.name} onChange={e => setDeck({...deck, name: e.target.value})}></Input>
+          <Input type='text' placeholder={`My Study Deck #${state.decks.length + 1}`} autoFocus={true} value={deck.name} onChange={e => setDeck({...deck, name: e.target.value})}></Input>
 
         </RowContainer>
         
+        <Title roomy>Currently, this deck has {deck.cards.length} cards in it.</Title>
         
-        <Title>Currently, this deck has {deck.cards.length} cards in it.</Title>
-        
-  
-        <Text>Search Card Categories</Text>
+        {/* Consider FORM-ing it up here so user can doot enter to search easily */}
         <RowContainer>
-          <Input type='text' placeholder={'Search card categories'} value={searchbar} onChange={e => setSearchbar(e.target.value)}></Input>
-          <Button onClick={() => performSearch(false)}>Search</Button>
-          <Button onClick={() => performSearch(true)}>Search and Force Add</Button>
+          <Text>Search Card Categories:</Text>
+          <Input wide type='text' placeholder={'(enter category to search)'} value={searchbar} onChange={e => setSearchbar(e.target.value)}></Input>
+          <Button tall onClick={() => performSearch(false)}>Search</Button>
+          <Button tall onClick={() => performSearch(true)}>Search and Force Add</Button>
+          {/* Remove "force add" button, add "select all" feature to foundCards container below */}
         </RowContainer>
   
-        <RowContainer>
+        <CardCollection>
           {foundCards.map((card, index) => (
             <CardPicker card={card} key={index} toggleCard={toggleCard} inDeck={deck.cards.findIndex(thiscard => thiscard.id === card.id) > -1} />
           ))}
-        </RowContainer>
+          {foundCards.length === 0 &&
+            <Title>Perform a search above to find cards to add to this deck!</Title>
+          }
+        </CardCollection>
 
         <Button tall action onClick={createDeck}>{deck.id ? 'Modify Deck' : 'Create Deck'}</Button>
   

@@ -181,6 +181,15 @@ export const Deck = styled.div`
     color: white;
 `;
 
+export const BigDeck = styled(Deck)`
+    flex-direction: column;
+    width: 400px;
+    height: 240px;
+    margin-right: 48px;
+    margin-bottom: 64px;
+    background-color: hsla(230, 35%, 70%, 1);
+`;
+
 export const InputContainer = styled(ContentContainer)`
     display: flex;
     align-items: center;
@@ -257,6 +266,9 @@ export const Title = styled.p`
     ${props => props.big && css`
         font-size: 36px;
     `}
+    ${props => props.white && css`
+        color: white;
+    `}
 `;
 
 export const Text = styled.p`
@@ -325,4 +337,21 @@ export const ColumnContainer = styled(ContentContainer)`
     ${props => props.screenheight && css`
         width: 100vh;
     `}
+`;
+
+export const CardCollection = styled(ContentContainer)`
+    flex-direction: row;
+    justify-content: center;
+    align-content: flex-start;
+    align-items: center;
+    margin: 1.5rem;
+    padding: 1rem;
+    width: 100%;
+    height: 400px;
+    border-radius: 6px;
+    border: 1px solid ${colors.blackish};
+`;
+
+export const DeckCollection = styled(CardCollection)`
+    
 `;
