@@ -8,6 +8,7 @@ import ModifyCard from './pages/ModifyCard';
 import ModifyDeck from './pages/ModifyDeck';
 import ViewCards from './pages/ViewCards';
 import ViewDecks from './pages/ViewDecks';
+import Syllabus from './pages/Syllabus';
 import SessionSetup from './pages/SessionSetup';
 import SessionStudy from './pages/SessionStudy';
 import UserPreferences from './pages/UserPreferences';
@@ -28,6 +29,7 @@ const App = () => {
         <Route exact path='/session_setup' component={SessionSetup} />
         <Route exact path='/session_study' component={SessionStudy} />
         <Route exact path='/user_preferences' component={UserPreferences} />
+        <Route exact path='/syllabus' component={Syllabus} />
       </Router>
     </Store>
   )

@@ -36,10 +36,11 @@ export const NavContainer = styled.div`
 `;
 
 export const Button = styled.button`
-    font-size: 16px;
+    font-size: 1.1rem;
     padding: 6px 12px;
     border-radius: 6px;
     width: 150px;
+    margin: 0.5rem;
     background-color: hsla(230, 40%, 60%, 1);
     font-weight: 600;
     border: 0;
@@ -260,6 +261,7 @@ export const Title = styled.p`
 
 export const Text = styled.p`
     font-size: 1.1rem;
+    margin: 0.5rem;
     line-height: 1.5;
     color: ${colors.blackish};
     font-weight: 500;
@@ -303,4 +305,24 @@ export const AlertContainer = styled.div`
     left: 30vw;
     bottom: 20px;
     animation: ${materializeIn} 0.2s linear;
+`;
+
+export const RowContainer = styled(ContentContainer)`
+    flex-direction: row;
+    ${props => props.screenwidth && css`
+        width: 100vw;
+    `}
+    ${props => props.fullwidth && css`
+        width: 100%;
+    `}
+    ${props => props.halfwidth && css`
+        width: 100vw;
+    `}
+`;
+
+export const ColumnContainer = styled(ContentContainer)`
+    flex-direction: column;
+    ${props => props.screenheight && css`
+        width: 100vh;
+    `}
 `;

@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Context, actions } from '../context/context';
 import { save, rando } from '../functions/globalfxns';
-import { PageContainer } from '../components/styles';
+import { PageContainer, RowContainer, Button, Title, Input, Text } from '../components/styles';
 
 const ModifyDeck = (props) => {
     const [state, dispatch] = useContext(Context);
@@ -15,7 +15,6 @@ const ModifyDeck = (props) => {
     });
     const [searchbar, setSearchbar] = useState('');
     const [foundCards, setFoundCards] = useState([]);
-    const [feedback, setFeedback] = useState({type: 'info', message: `Make or modify a deck of cards here!`});
   
     function performSearch(force) {
       if (!searchbar) return;
@@ -23,6 +22,7 @@ const ModifyDeck = (props) => {
   
       if (!force) {
         setFoundCards(searchResults);
+        return;
       } else if (force) {
         let newCards = [...deck.cards];
         searchResults.forEach(card => {
@@ -41,15 +41,15 @@ const ModifyDeck = (props) => {
       if (!deck.name) errorMessage += `Please name the deck. `;
       if (!deck.cards.length) errorMessage += `A deck should have at least one card in it. `;
       if (errorMessage) {
-        setFeedback({type: 'error', message: errorMessage});
+        // Nada - change to ALERT_USER dispatching
       } else {
-        setFeedback({type: 'info', message: `Looks good. Creating new deck now...`});
+        // Removed -- change to ALERT_USER dispatching
   
         if (deck.id) {
           console.log(`Deck already exists, we're just modifying it. Doing that now...`);
           const indexToEdit = state.decks.findIndex(deckedit => deckedit.id === deck.id);
           dispatch({type: actions.EDIT_A_DECK, payload: {deck: deck, index: indexToEdit}});
-          setFeedback({type: 'info', message: 'Deck successfully updated!'});
+          // Removed setFeedback; change to ALERT_USER dispatching
           return;
         }
   
@@ -87,7 +87,7 @@ const ModifyDeck = (props) => {
           creationTime: undefined
         });
         
-        setFeedback({type: 'info', message: `Deck has been saved!`});
+        // Removed another setFeedback here -- change to dispatch
       }
     }
   
@@ -124,31 +124,31 @@ const ModifyDeck = (props) => {
     return (
       <PageContainer>
   
-        <div className='flex flex-row' style={{width: '100%', height: '100px', border: '1px solid black'}}>
-          <div className='flex-centered' style={{width: '50%'}}>
-            <input type='text' className='text-input' placeholder={'Name of Deck'} value={deck.name} onChange={e => setDeck({...deck, name: e.target.value})}></input>
-          </div>
-          <div className='flex-centered' style={{width: '50%'}}>
-            <h3>{feedback.message}</h3>
-          </div>
-        </div>
+        <RowContainer>
+          
+          <Text>Name of Deck:</Text>
+          <Input type='text' placeholder={'Name of Deck'} value={deck.name} onChange={e => setDeck({...deck, name: e.target.value})}></Input>
+
+        </RowContainer>
         
-        <button className='btn small-btn' onClick={createDeck}>{deck.id ? 'Modify Deck' : 'Create Deck'}</button>
-        <h2>Currently, this deck has {deck.cards.length} cards in it.</h2>
+        
+        <Title>Currently, this deck has {deck.cards.length} cards in it.</Title>
         
   
-        <label>Search Card Categories</label>
-        <div style={{display: 'flex', flexDirection: 'row', height: '60px', justifyContent: 'space-around', alignItems: 'center'}}>
-          <input type='text' className='text-input' placeholder={'Search card categories'} value={searchbar} onChange={e => setSearchbar(e.target.value)}></input>
-          <button className='btn small-btn' onClick={() => performSearch(false)}>Search</button>
-          <button className='btn small-btn' onClick={() => performSearch(true)}>Search and Force Add</button>
-        </div>
+        <Text>Search Card Categories</Text>
+        <RowContainer>
+          <Input type='text' placeholder={'Search card categories'} value={searchbar} onChange={e => setSearchbar(e.target.value)}></Input>
+          <Button onClick={() => performSearch(false)}>Search</Button>
+          <Button onClick={() => performSearch(true)}>Search and Force Add</Button>
+        </RowContainer>
   
-        <div className='flex flex-row' style={{height: '400px', width: '100%', border: '1px solid black', padding: '10px'}}>
+        <RowContainer>
           {foundCards.map((card, index) => (
             <CardPicker card={card} key={index} toggleCard={toggleCard} inDeck={deck.cards.findIndex(thiscard => thiscard.id === card.id) > -1} />
           ))}
-        </div>
+        </RowContainer>
+
+        <Button tall action onClick={createDeck}>{deck.id ? 'Modify Deck' : 'Create Deck'}</Button>
   
       </PageContainer>
     )

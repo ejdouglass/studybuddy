@@ -142,6 +142,7 @@ const SessionSetup = () => {
 
           <DeckSelectorMenu>
             {/* Mostly arrow over boopy show */}
+            (boopy arrow go here)
           </DeckSelectorMenu>
   
           <DecksList>

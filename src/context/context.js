@@ -92,6 +92,7 @@ const initialState = {
     settings: {
         font: 'default'
     },
+    syllabus: [],
     alert: {type: 'info', message: '', startTime: undefined, duration: 0},
     backupAlerts: []
 }
