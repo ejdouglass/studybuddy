@@ -2,10 +2,11 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { PageContainer, Text, Title, BigDeck, Button, DeckCollection, RowContainer } from '../components/styles';
+import { PageContainer, Text, Title, BigDeck, Button, DeckCollection, ColumnContainer, RowContainer } from '../components/styles';
 
 const ViewDecks = () => {
     const [state, dispatch] = useContext(Context);
+    const history = useHistory();
   
     useEffect(() => {
       dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/view_decks', currentAction: {}}});
@@ -22,11 +23,27 @@ const ViewDecks = () => {
           {state.decks.map((deck, index) => (
             <DeckPreview key={index} deck={deck} dispatch={dispatch} />
           ))}
+          {state.decks.length === 0 && (
+            <ColumnContainer>
+              <Title>You have no decks assembled yet.</Title>
+              {state.cards.length !== 0 ? (
+                <Button onClick={() => history.push('/modify_deck')}>Let's Make Decks!</Button>
+              ) : (
+                <>
+                  <Text>For that matter, you have no cards, either, so let's start there!</Text>
+                  <Button onClick={() => history.push('/modify_card')}>Let's Make Cards!</Button>
+                </>
+              )}
+            </ColumnContainer>
+          )
+          }
         </DeckCollection>
       </PageContainer>
     )
 }
   
+
+
 const DeckPreview = (props) => {
     const {deck} = props;
     const history = useHistory();

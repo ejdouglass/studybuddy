@@ -56,27 +56,35 @@ export const Button = styled.button`
     ${props => props.left && css`
         border-radius: 6px 0 0 6px;
         border-right: 2px solid hsl(230, 80%, 20%);
+        margin: 0;
     `}
     ${props => props.right && css`
         border-radius: 0 6px 6px 0;
+        margin: 0;
     `}
     ${props => props.segment && css`
         border-radius: 0;
         border-right: 2px solid hsl(230, 80%, 20%);
+        margin: 0;
     `}
     ${props => props.tall && css`
         height: 50px;
     `}
+    ${props => props.itty && css`
+        width: 80px;
+        font-size: 0.7rem;
+        font-weight: 600;
+    `}
     ${props => props.huge && css`
         height: 100px;
         border-radius: 10px;
-        font-size: 18px;
+        font-size: 1.5rem;
     `}
     ${props => props.action && css`
         background-color: hsla(340, 60%, 50%, 1);
     `}
     ${props => props.grayed && css`
-        background-color: hsla(340, 60%, 50%, 0.6);
+        opacity: 0.4;
         color: hsla(240, 30%, 100%, 0.9);
     `}
     ${props => props.elbowroom && css`
@@ -190,6 +198,15 @@ export const BigDeck = styled(Deck)`
     background-color: hsla(230, 35%, 70%, 1);
 `;
 
+export const DeckCard = styled(BigDeck)`
+    width: 200px;
+    height: 120px;
+    font-size: 1.1rem;
+    margin-right: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: none;
+`;
+
 export const InputContainer = styled(ContentContainer)`
     display: flex;
     align-items: center;
@@ -277,6 +294,11 @@ export const Text = styled.p`
     line-height: 1.5;
     color: ${colors.blackish};
     font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    ${props => props.white && css`
+        color: white;
+    `}
 `;
 
 export const ButtonPrompt = styled(Text)`

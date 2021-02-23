@@ -45,6 +45,8 @@ const UserAlert = () => {
         }
       }, [alert.duration]);
 
+    // Below: Be sure to enact multiple styling effects based on alert TYPE.
+    // Thinking SUCCESS, ERROR, INFO are the basic types!
     return (
         <>
             {alert.duration > 0 &&

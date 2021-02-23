@@ -23,6 +23,10 @@ const UserPreferences = () => {
   
       URL.revokeObjectURL(a.href);
     }
+
+    function clearAppData() {
+      localStorage.removeItem('studyBuddyData');
+    }
   
     useEffect(() => {
       dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/user_preferences', currentAction: {}}});
@@ -53,16 +57,16 @@ const UserPreferences = () => {
       <PageContainer>
         <Title>User Preferences</Title>
         
-        <Button className='btn small-btn'>CLEAR APP DATA</Button>
+        <Button onClick={clearAppData}>CLEAR APP DATA</Button>
 
         <Input type='file' id='file-selector' accept='.txt' onChange={e => setLoaderFile(e.target.files)} ></Input>
         
         <textarea id='text-app-data' value={JSON.stringify(state)} style={{resize: 'none', width: '40vw', height: '300px', border: '1px solid black'}} readOnly={true}></textarea>
   
       
-        <Button roomy className='btn small-btn' onClick={copyData}>Copy App Data to Clipboard</Button>
+        <Button roomy onClick={copyData}>Copy App Data to Clipboard</Button>
 
-        <Button className='btn small-btn' onClick={saveDataToFile}>Save App Data as .txt File</Button>
+        <Button onClick={saveDataToFile}>Save App Data as .txt File</Button>
 
       </PageContainer>
     )

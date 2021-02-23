@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { PageContainer, ContentContainer, Button, Title, Text, Input } from '../components/styles';
+import { PageContainer, ColumnContainer, ContentContainer, Button, Title, Text, Input, DeckCard, CardCollection, RowContainer } from '../components/styles';
 
 const ViewCards = () => {
     const [state, dispatch] = useContext(Context);
@@ -72,6 +72,34 @@ const ViewCards = () => {
     return (
       <PageContainer>
   
+        <RowContainer>
+          <ContentContainer>
+            <Text>Search: </Text>
+            <Input wide type='text' placeholder={`(search cards for words or phrases)`} value={search} onChange={e => setSearch(e.target.value)}></Input>
+          </ContentContainer>
+  
+          <ContentContainer>
+            <Text>Card Parts Searched: </Text>
+            <Button grayed={!filter.front} onClick={() => setFilter({...filter, front: !filter.front})}>Front</Button>
+            <Button grayed={!filter.back} onClick={() => setFilter({...filter, back: !filter.back})}>Back</Button>
+            <Button grayed={!filter.categories} onClick={() => setFilter({...filter, categories: !filter.categories})}>Categories</Button>
+            <Button grayed={!filter.description} onClick={() => setFilter({...filter, description: !filter.description})}>Description</Button>
+          </ContentContainer>
+        </RowContainer>
+
+        <CardCollection>
+          {viewedCards.map((card, index) => (
+            <CardPreview card={card} key={index} deleteCard={deleteCard} history={history}/>
+          ))}
+          {state.cards.length === 0 && (
+            <ColumnContainer>
+              <Title>You can't search your cards until you make some!</Title>
+              <Button onClick={() => history.push('/modify_card')}>Go Make Cards!</Button>
+            </ColumnContainer>
+          )
+          }
+        </CardCollection>
+
         {deletionDetails.card?.id &&
         <ContentContainer column centered>
           <Title>Are you sure you want to delete this card?</Title>
@@ -81,32 +109,13 @@ const ViewCards = () => {
           </ContentContainer>
         </ContentContainer>
         }
-  
-        <div className='flex-centered flex-row' style={{width: '90vw', justifyContent: 'space-around', border: '1px solid black'}}>
-          <Text>Search and Mod Cards</Text>
-          <ContentContainer>
-            <Text>Search: </Text>
-            <Input type='text' value={search} onChange={e => setSearch(e.target.value)}></Input>
-          </ContentContainer>
-  
-          <ContentContainer>
-            <Text>Search Areas: </Text>
-            <Button style={{backgroundColor: filter.front ? 'green' : 'red'}} onClick={() => setFilter({...filter, front: !filter.front})} >Front</Button>
-            <Button style={{backgroundColor: filter.back ? 'green' : 'red'}} onClick={() => setFilter({...filter, back: !filter.back})}   >Back</Button>
-            <Button style={{backgroundColor: filter.categories ? 'green' : 'red'}} onClick={() => setFilter({...filter, categories: !filter.categories})}   >Categories</Button>
-            <Button style={{backgroundColor: filter.description ? 'green' : 'red'}} onClick={() => setFilter({...filter, description: !filter.description})}  >Description</Button>
-          </ContentContainer>
-          
-        </div>
 
-        <ContentContainer className='cards-list-holder'>
-          {viewedCards.map((card, index) => (
-          <CardPreview card={card} key={index} deleteCard={deleteCard} history={history}/>
-          ))}
-        </ContentContainer>
       </PageContainer>
     )
 }
+
+
+
 
 const CardPreview = (props) => {
     const {card} = props;
@@ -114,18 +123,20 @@ const CardPreview = (props) => {
     const deleteCard = props.deleteCard;
   
     return (
-      <div className='card-preview' onMouseEnter={() => setOptionsVisible(true)} onMouseLeave={() => setOptionsVisible(false)}>
-        <div style={{flex: 3}}>
-          <Text>{card.front}</Text>
-        </div>
+      <DeckCard onMouseEnter={() => setOptionsVisible(true)} onMouseLeave={() => setOptionsVisible(false)}>
         
-        <div style={{visibility: optionsVisible ? 'visible' : 'hidden', flex: 1}}>
-          <Button>Peep</Button>
-          <Button onClick={() => deleteCard(card)}>Delete</Button>
-          <Button onClick={() => props.history.push('/modify_card', {cardData: card})}>Edit</Button>
-        </div>
+        <Text white>{card.front}</Text>
+
+        {optionsVisible &&
+          <>
+            <RowContainer fullwidth>
+              <Button itty onClick={() => props.history.push('/modify_card', {cardData: card})}>View/Edit</Button>
+              <Button itty action onClick={() => deleteCard(card)}>Delete</Button>
+            </RowContainer>
+          </>
+        }
   
-      </div>
+      </DeckCard>
     )
 }
 
