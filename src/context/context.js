@@ -11,7 +11,8 @@ export const actions = {
     UPDATE_WHATDO: 'update_whatdo',
     LOAD_SAVED_DATA: 'load_saved_data',
     ALERT_USER: 'alert_user',
-    DISMISS_ALERT: 'dismiss_alert'
+    DISMISS_ALERT: 'dismiss_alert',
+    ADD_A_TOPIC: 'add_a_topic'
 };
   
 export const Reducer = (state, action) => {
@@ -65,7 +66,10 @@ export const Reducer = (state, action) => {
             return action.payload;
 
         case actions.ALERT_USER:
-            return {...state, alert: action.payload};
+            let alert = action.payload;
+            if (!alert.duration) alert.duration = 10;
+            if (!alert.type) alert.type = 'info';
+            return {...state, alert: alert};
         
         case actions.DISMISS_ALERT:
             return {...state, alert: {type: 'info', message: '', startTime: undefined, duration: 0}};
@@ -73,6 +77,10 @@ export const Reducer = (state, action) => {
         case actions.ADD_NEW_SESSION:
             let newSessionCollection = [...state.sessions, action.payload];
             return {...state, sessions: newSessionCollection};
+
+        case actions.ADD_A_TOPIC:
+            let newNotes = [...state.notes, action.payload];
+            return {...state, notes: newNotes};
 
         default:
             return state;
@@ -93,6 +101,7 @@ const initialState = {
         font: 'default'
     },
     syllabus: [],
+    notes: [],
     alert: {type: 'info', message: '', startTime: undefined, duration: 0},
     backupAlerts: []
 }

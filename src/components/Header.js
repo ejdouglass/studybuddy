@@ -26,6 +26,7 @@ const Header = () => {
       <AppHeader className='app-header' style={{display: 'flex', flexDirection: 'column'}}>
         <NavContainer>
           <NavButton onClick={() => history.push('/')}>Home</NavButton>
+          <NavButton onClick={() => history.push('/notes')}>My Notes</NavButton>
           <NavButton onClick={() => history.push('/syllabus')}>Syllabus</NavButton>
           <NavButton onClick={() => history.push('/session_setup')}>Study!</NavButton>
           <NavButton onClick={() => history.push('/modify_card')}>Create Cards</NavButton>

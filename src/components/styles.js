@@ -377,3 +377,10 @@ export const CardCollection = styled(ContentContainer)`
 export const DeckCollection = styled(CardCollection)`
     
 `;
+
+export const Form = styled.form`
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+`;

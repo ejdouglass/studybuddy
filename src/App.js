@@ -6,6 +6,7 @@ import Header from './components/Header';
 import Landing from './pages/Landing';
 import ModifyCard from './pages/ModifyCard';
 import ModifyDeck from './pages/ModifyDeck';
+import Notes from './pages/Notes';
 import ViewCards from './pages/ViewCards';
 import ViewDecks from './pages/ViewDecks';
 import Syllabus from './pages/Syllabus';
@@ -30,6 +31,7 @@ const App = () => {
         <Route exact path='/session_study' component={SessionStudy} />
         <Route exact path='/user_preferences' component={UserPreferences} />
         <Route exact path='/syllabus' component={Syllabus} />
+        <Route exact path='/notes' component={Notes} />
       </Router>
     </Store>
   )
