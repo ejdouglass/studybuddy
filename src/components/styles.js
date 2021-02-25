@@ -122,20 +122,29 @@ export const ContentContainer = styled.div`
     ${props => props.column && css`
         flex-direction: column;
     `}
-    ${props => props.full && css`
+    ${props => props.fullwidth && css`
         width: 100%;
+    `}
+    ${props => props.fullheight && css`
+        height: 100%;
     `}
     ${props => props.wide && css`
         width: 80%;
     `}
-    ${props => props.half && css`
+    ${props => props.tall && css`
+        height: 80%;
+    `}
+    ${props => props.halfwidth && css`
         width: 50%;
     `}
-    ${props => props.quarter && css`
+    ${props => props.halfheight && css`
+        height: 50%;
+    `}
+    ${props => props.quarterwidth && css`
         width: 25%;
     `}
-    ${props => props.tall && css`
-        height: 75vh;
+    ${props => props.quarterheight && css`
+        height: 25%;
     `}
     ${props => props.short && css`
         height: 25vh;
@@ -427,4 +436,37 @@ export const TopicsContainer = styled(ContentContainer)`
     justify-content: space-around;
     align-content: flex-start;
     flex-wrap: wrap;
+`;
+
+export const NotepadToolbar = styled(ContentContainer)`
+    flex-direction: row;
+    justify-content: space-around;
+    padding: 4px;
+    width: 100%;
+    border-bottom: 1px solid ${colors.blackish};
+`;
+
+export const NoteToolButton = styled(Button)`
+    margin: 0 0.5rem;
+    padding: 0;
+    width: 50px;
+    height: 50px;
+    background-color: ${colors.base};
+    &:hover {
+        transform: translateY(-1px);
+    }
+`;
+
+export const Notepad = styled(ContentContainer)`
+    flex-direction: row;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    width: 85vw;
+    height: 60vh;
+    border-radius: 10px;
+    border: 2px solid ${colors.pale};
+`;
+
+export const Word = styled(Text)`
+    margin: 1.5rem;
 `;

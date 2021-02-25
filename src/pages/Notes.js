@@ -1,11 +1,11 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer } from '../components/styles';
+import { PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton } from '../components/styles';
 
 const Notes = () => {
     const [state, dispatch] = useContext(Context);
-    const [selectedTopic, setSelectedTopic] = useState(undefined);
+    const [selectedTopicIndex, setSelectedTopicIndex] = useState(undefined); 
     const [newTopicName, setNewTopicName] = useState('');
     const [newTopicDesc, setNewTopicDesc] = useState('');
     const initialLoad = useRef(true);
@@ -37,41 +37,64 @@ const Notes = () => {
 
     useEffect(() => {
         dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/notes', currentAction: {}}});
-    }, []);
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (selectedTopicIndex !== undefined) {
+            // A topic has been selected; act on that here, if applicable
+        }
+    }, [selectedTopicIndex]);
 
     return (
         <PageContainer>
-            {state.notes.length > 0 ? (
+            {selectedTopicIndex === undefined ? (
                 <>
-                    <RowContainer full centered>
-                        <Form centered row onSubmit={createNewTopic}>
-                            <Input type='text' autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
-                            <Input doublewide tight type='text' placeholder={`(new topic description)`} value={newTopicDesc} onChange={(e) => setNewTopicDesc(e.target.value)}></Input>
-                            <Button>Create New Topic!</Button>
-                        </Form>
-                    </RowContainer>
-                    <Title>Select a Topic to Study or Take Notes On</Title>
-                    <TopicsContainer style={{border: '1px solid black'}}>
-                        {state.notes.map((topic, index) => (
-                            // Ok! Works fine. Let's refactor into a proper Card/component.
-                            <TopicCard key={index} topic={topic}>{topic.name}</TopicCard>
-                        ))}
-                    </TopicsContainer>
-                </>
+                {state.notes.length > 0 ? (
+                    <>
+                        <RowContainer full centered>
+                            <Form centered row onSubmit={createNewTopic}>
+                                <Input type='text' autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
+                                <Input doublewide tight type='text' placeholder={`(new topic description)`} value={newTopicDesc} onChange={(e) => setNewTopicDesc(e.target.value)}></Input>
+                                <Button>Create New Topic!</Button>
+                            </Form>
+                        </RowContainer>
+                        <Title>Select a Topic to Study or Take Notes On</Title>
+                        <TopicsContainer>
+                            {state.notes.map((topic, index) => (
+                                // Ok! Works fine. Let's refactor into a proper Card/component.
+                                <TopicCard key={index} index={index} topic={topic} setSelectedTopicIndex={setSelectedTopicIndex}>{topic.name}</TopicCard>
+                            ))}
+                        </TopicsContainer>
+                    </>
+                ) : (
+                    <>
+                        <Title>You haven't written any Notes yet!</Title>
+                        <Text>Get started by naming a new Topic to take notes in:</Text>
+                        <ColumnContainer half centered>
+                            <Form onSubmit={createNewTopic}>
+                                <Input type='text' autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
+                                <Input doublewide tight type='text' placeholder={`(new topic description)`} value={newTopicDesc} onChange={(e) => setNewTopicDesc(e.target.value)}></Input>
+                                <Button rightside>Create New Topic!</Button>
+                            </Form>
+                        </ColumnContainer>
+                    </>
+                )}
+                </> 
             ) : (
-                <>
-                    <Title>You haven't written any Notes yet!</Title>
-                    <Text>Get started by naming a new Topic to take notes in:</Text>
-                    <ColumnContainer half centered>
-                        <Form onSubmit={createNewTopic}>
-                            <Input type='text' autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
-                            <Input doublewide tight type='text' placeholder={`(new topic description)`} value={newTopicDesc} onChange={(e) => setNewTopicDesc(e.target.value)}></Input>
-                            <Button rightside>Create New Topic!</Button>
-                        </Form>
-                    </ColumnContainer>
-                </>
+                <ColumnContainer fullwidth>
+                    <RowContainer fullwidth>
+                        <Button bold leftside onClick={() => setSelectedTopicIndex(undefined)}>Go Back</Button>
+                    </RowContainer>
+                    <Title>{state?.notes[selectedTopicIndex].name}</Title>
+                    <Notepad>
+                        <NotepadToolbar>
+                            <NoteToolButton>HI</NoteToolButton>
+                            <NoteToolButton>YO</NoteToolButton>
+                        </NotepadToolbar>
+                        {/* Words go here :P */}
+                    </Notepad>
+                </ColumnContainer>
             )}
-            
         </PageContainer>
     )
 }
@@ -79,8 +102,9 @@ const Notes = () => {
 
 const TopicCard = (props) => {
     const {topic} = props;
+    const setSelectedTopicIndex = props.setSelectedTopicIndex;
     return (
-        <Card>
+        <Card onClick={() => setSelectedTopicIndex(props.index)}>
             <Title>{topic.name}</Title>
             <Text>{topic.description || `(no description)`}</Text>
         </Card>

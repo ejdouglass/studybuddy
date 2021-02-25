@@ -30,9 +30,9 @@ const Landing = () => {
       <PageContainer>
         <Title roomy>Welcome to your Landing Page. Working on content for this bit.</Title>
         <ColumnContainer uncentered>
-          <Text>You currently have {state.cards.length} cards in your box.</Text>
+          <Text>You've written {state.cards.length} flashcards.</Text>
           <Text>You've made {state.decks.length} decks out of these.</Text>
-          <Text>Also, you've gone ahead and set up {state.notes.length} different Topics to take notes on.</Text> 
+          <Text>You've drafted {state.notes.length} different Topics to take notes on.</Text> 
           <Button leftside onClick={alertTest}>(Test Alert System)</Button>       
         </ColumnContainer>
 
