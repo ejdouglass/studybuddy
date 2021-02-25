@@ -4,6 +4,7 @@ import styled, { keyframes, css } from 'styled-components';
 
 const colors = {
     base: 'hsla(230, 70%, 35%, 1)',
+    pale: 'hsla(230, 70%, 35%, 0.3)',
     blackish: 'hsla(230, 70%, 25%, 1)'
 }
 
@@ -80,7 +81,7 @@ export const Button = styled.button`
         border-radius: 10px;
         font-size: 1.5rem;
     `}
-    ${props => props.action && css`
+    ${props => props.bold && css`
         background-color: hsla(340, 60%, 50%, 1);
     `}
     ${props => props.grayed && css`
@@ -96,6 +97,12 @@ export const Button = styled.button`
     `}
     ${props => props.wide && css`
         width: 300px;
+    `}
+    ${props => props.rightside && css`
+        align-self: flex-end;
+    `}
+    ${props => props.leftside && css`
+        align-self: flex-start;
     `}
 `;
 
@@ -229,6 +236,7 @@ export const Input = styled.input`
     font-size: 1.1rem;
     color: ${colors.blackish};
     padding: 0.8rem 1rem;
+    margin: 1rem;
     width: 200px;
     ${props => props.centered && css`
         text-align: center;
@@ -246,6 +254,10 @@ export const Input = styled.input`
     `}
     ${props => props.doublewide && css`
         width: 600px;
+    `}
+    ${props => props.tight && css`
+        margin-top: 0;
+        margin-bottom: 0;
     `}
 `;
 
@@ -334,9 +346,9 @@ export const AlertContainer = styled.div`
     background-color: hsl(240, 5%, 100%);
     border: 1px solid hsla(240, 60%, 10%, 0.3);
     position: fixed;
-    width: 40vw;
+    width: calc(100px + 30vw);
     height: 150px;
-    left: 30vw;
+    left: calc(35vw - 50px);
     bottom: 20px;
     animation: ${materializeIn} 0.2s linear;
 `;
@@ -358,6 +370,9 @@ export const ColumnContainer = styled(ContentContainer)`
     flex-direction: column;
     ${props => props.screenheight && css`
         width: 100vh;
+    `}
+    ${props => props.uncentered && css`
+        align-items: flex-start;
     `}
 `;
 
@@ -381,6 +396,35 @@ export const DeckCollection = styled(CardCollection)`
 export const Form = styled.form`
     display: flex;
     width: 100%;
-    justify-content: center;
+    flex-direction: column;
+    ${props => props.row && css`
+        flex-direction: row;
+    `}
+    ${props => props.centered && css`
+        justify-content: center;
+        align-items: center;
+    `}
+`;
+
+export const Card = styled.div`
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    margin: 1rem;
     align-items: center;
+    width: 250px;
+    height: 200px;
+    border-radius: 12px;
+    border: 2px solid ${colors.pale};
+    &:hover {
+        background-color: ${colors.pale};
+        transform: translateY(-1px);
+    }
+`;
+
+export const TopicsContainer = styled(ContentContainer)`
+    flex-direction: row;
+    justify-content: space-around;
+    align-content: flex-start;
+    flex-wrap: wrap;
 `;

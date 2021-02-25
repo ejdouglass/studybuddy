@@ -1,12 +1,12 @@
 import React, { useEffect, useContext } from 'react';
-import { useHistory } from 'react-router-dom';
+// import { useHistory } from 'react-router-dom';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { PageContainer, Button, Title, Text } from '../components/styles';
+import { PageContainer, ColumnContainer, Button, Title, Text } from '../components/styles';
 
 const Landing = () => {
     const [state, dispatch] = useContext(Context);
-    const history = useHistory();
+    // const history = useHistory();
 
     function alertTest() {
       const newAlert = {
@@ -20,7 +20,7 @@ const Landing = () => {
   
     useEffect(() => {
       dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/', currentAction: {}}});
-    }, []);
+    }, [dispatch]);
   
     useEffect(() => {
       save(state);
@@ -29,10 +29,13 @@ const Landing = () => {
     return (
       <PageContainer>
         <Title roomy>Welcome to your Landing Page. Working on content for this bit.</Title>
-        <Text>You currently have {state.cards.length} cards in your box.</Text>
-        <Text>You've made {state.decks.length} decks out of these.</Text>
+        <ColumnContainer uncentered>
+          <Text>You currently have {state.cards.length} cards in your box.</Text>
+          <Text>You've made {state.decks.length} decks out of these.</Text>
+          <Text>Also, you've gone ahead and set up {state.notes.length} different Topics to take notes on.</Text> 
+          <Button leftside onClick={alertTest}>(Test Alert System)</Button>       
+        </ColumnContainer>
 
-        <Button wide onClick={alertTest}>(Test Alert System)</Button>
       </PageContainer>
     )
 }

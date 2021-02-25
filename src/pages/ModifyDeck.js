@@ -112,7 +112,7 @@ const ModifyDeck = (props) => {
   
     useEffect(() => {
       dispatch({type: actions.UPDATE_WHATDO, payload: {page: '/modify_deck', currentAction: {}}});
-    }, []);
+    }, [dispatch]);
   
     useEffect(() => {
       save(state);
@@ -156,7 +156,7 @@ const ModifyDeck = (props) => {
           }
         </CardCollection>
 
-        <Button tall action onClick={createDeck}>{deck.id ? 'Modify Deck' : 'Create Deck'}</Button>
+        <Button tall bold onClick={createDeck}>{deck.id ? 'Modify Deck' : 'Create Deck'}</Button>
   
       </PageContainer>
     )

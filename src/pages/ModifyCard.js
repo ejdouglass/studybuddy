@@ -121,7 +121,7 @@ const ModifyCard = (props) => {
         <Text>Back</Text>
         <textarea className='create-card' value={card.back} rows='5' cols='50' onChange={e => setCard({...card, back: e.target.value})}></textarea>
   
-        <Button roomy tall action onClick={createNewCard}>{card.id ? 'Update Card' : 'Make New Card'}</Button>
+        <Button roomy tall bold onClick={createNewCard}>{card.id ? 'Update Card' : 'Make New Card'}</Button>
   
       </PageContainer>
     )

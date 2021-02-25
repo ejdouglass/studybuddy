@@ -149,7 +149,7 @@ const SessionSetup = () => {
             {sessionPrep.decksToUse.map((deck, index) => (<Deck key={index} onClick={() => removeDeckFromSession(deck)}>{deck.name}</Deck>))}
           </DecksList>
 
-          <Button huge action grayed={sessionPrep.decksToUse.length > 0 ? false : true} onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'CHOOSE 1+ DECK(S)'}</Button>
+          <Button huge bold grayed={sessionPrep.decksToUse.length > 0 ? false : true} onClick={goStudy}>{sessionPrep.decksToUse.length > 0 ? 'READY TO STUDY!' : 'CHOOSE 1+ DECK(S)'}</Button>
         </ContentContainer>
   
         
