@@ -64,6 +64,9 @@ const SessionStudy = (props) => {
         if (keysDown.current[4]) updateCardMastery(4);
         if (keysDown.current[5]) updateCardMastery(5);
         if (keysDown.current.a) answerRef.current.focus();
+      } else {
+        // In this block, we can assume the 'answer' box is focused, so if the user just hit escape, blur back to normal controls
+        if (e.key === 'Escape') answerRef.current.blur();
       }
     }
   
@@ -238,10 +241,10 @@ const SessionStudy = (props) => {
   
         {(sessionData.startTime && !sessionData.finished) &&
         <div className='flex-centered flex-col' style={{width: '100%'}}>
-          <h1>You ARE studying, buddy! You're on card {sessionData.currentCardIndex + 1} of {sessionData.cards.length}.</h1>
+          <Title headroom>You're on card {sessionData.currentCardIndex + 1} of {sessionData.cards.length}.</Title>
   
           <div>
-            <h3>Study Time: {studyTime}</h3>
+            <Text>Study Time: {studyTime}</Text>
           </div>
   
           <div className='flex flex-row' style={{width: '90%', border: '1px solid black', justifyContent: 'space-around', alignItems: 'center'}}>
@@ -270,7 +273,7 @@ const SessionStudy = (props) => {
           </div>
           
           <div style={{width: '60%', height: '200px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
-            <textarea ref={answerRef} placeholder={'Tap (a) key to focus this answer section'} style={{padding: '10px', border: '1px solid black', width: '100%', height: '200px', textAlign: 'center', resize: 'none', fontSize: '24px', fontFamily: 'sans-serif'}} value={sessionData.cards[sessionData.currentCardIndex].answer} onChange={e => updateAnswer(e.target.value)}></textarea>
+            <textarea ref={answerRef} placeholder={`Press (a) key to focus this answer section; press (esc) to return to card controls`} style={{padding: '10px', border: '1px solid black', width: '100%', height: '200px', textAlign: 'center', resize: 'none', fontSize: '24px', fontFamily: 'sans-serif'}} value={sessionData.cards[sessionData.currentCardIndex].answer} onChange={e => updateAnswer(e.target.value)}></textarea>
           </div>
           
   

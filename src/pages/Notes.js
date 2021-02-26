@@ -1,13 +1,14 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton } from '../components/styles';
+import { PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
 
 const Notes = () => {
     const [state, dispatch] = useContext(Context);
     const [selectedTopicIndex, setSelectedTopicIndex] = useState(undefined); 
     const [newTopicName, setNewTopicName] = useState('');
     const [newTopicDesc, setNewTopicDesc] = useState('');
+    const [words, setWords] = useState([]);
     const initialLoad = useRef(true);
 
     function createNewTopic(e) {
@@ -92,6 +93,16 @@ const Notes = () => {
                             <NoteToolButton>YO</NoteToolButton>
                         </NotepadToolbar>
                         {/* Words go here :P */}
+                        {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
+                            <ContentContainer key={index}>
+                                {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
+                                <Title>subtopic.name</Title>
+                                {subtopic.content.map((content, index) => (
+                                    <NotesContent key={index} />
+                                ))}
+                            </ContentContainer>
+                        ))}
+                        
                     </Notepad>
                 </ColumnContainer>
             )}
@@ -108,6 +119,16 @@ const TopicCard = (props) => {
             <Title>{topic.name}</Title>
             <Text>{topic.description || `(no description)`}</Text>
         </Card>
+    )
+}
+
+
+
+const NotesContent = (props) => {
+
+    return (
+        <>
+        </>
     )
 }
 
@@ -142,9 +163,35 @@ export default Notes;
     -- Each index represents a 'topic' object:
     topic: {
         name: 'TOPIC_NAME',
-        subtopics: [ {} ],
+        subtopics: [ { name: 'SUBTOPIC_NAME', content: [ {} ] } ],
         resources: [ {} ],
         notes: [ { type: 'paragraph || header || bullets', content: [ 'word1', 'word2', '...' ] } ]
     }
+
+
+    For a little later:
+    -- rename topics
+    -- reorganize bits into other parts (if I make a new topic and want to scoot stuff around)
+
+
+
+    TOOLBAR BITS:
+    -- Add Subtopic (mega-heading; searchable; everything under it is collapsible)
+    -- Add Header (basic visual heading differentiator; defaults to turning back off when you hit enter)
+    -- Add Bullet(s) (defaults to on for newline; turns back 'on' if you backspace into previous, bulleted line; turns off if backspace at newline that is tentatively bulleted)
+    -- Highlighting? (Gotta figure out how I want to implement this)
+
+
+
+    Should I HIJACK the keyDown stuff here? Hmmm. Like a totally independent behavior that mimics but isn't the default behavior for all keys?
+    ... risky, because it'll lock out a lot of the user's expected keyboard shortcut behavior, which I don't like.
+    ... think about ways to parse incoming data in a non-blocking way... observe the user's input, and respond behind-the-scenes more cleverly.
+
+
+    LATEST 2/26/21 - 
+    -- Gotta be able to take notes. Refer to above for structuring, then build out CAN TAKE NOTES.
+    -- Think through how you want to use it, backsolve.
+    
+    -- USING IT! I click on Notes. On Note page. Click the Topic. Default is "loose notes" for that topic? "Unsorted" is always the first Subtopic.
 
 */

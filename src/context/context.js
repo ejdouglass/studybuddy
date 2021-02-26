@@ -79,6 +79,7 @@ export const Reducer = (state, action) => {
             return {...state, sessions: newSessionCollection};
 
         case actions.ADD_A_TOPIC:
+            let newTopic = {...action.payload, subtopics: [{name: 'Unsorted Notes', content: []}]};
             let newNotes = [...state.notes, action.payload];
             return {...state, notes: newNotes};
 
