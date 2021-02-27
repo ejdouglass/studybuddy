@@ -92,13 +92,13 @@ const Notes = () => {
                             <NoteToolButton>HI</NoteToolButton>
                             <NoteToolButton>YO</NoteToolButton>
                         </NotepadToolbar>
-                        {/* Words go here :P */}
+                        {/* Next confuddle -- where do I put the INPUT the user is currently editing? Seamlessly? */}
                         {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
                             <ContentContainer key={index}>
                                 {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
                                 <Title>subtopic.name</Title>
                                 {subtopic.content.map((content, index) => (
-                                    <NotesContent key={index} />
+                                    <NotesContent key={index} content={content} />
                                 ))}
                             </ContentContainer>
                         ))}
@@ -114,6 +114,7 @@ const Notes = () => {
 const TopicCard = (props) => {
     const {topic} = props;
     const setSelectedTopicIndex = props.setSelectedTopicIndex;
+
     return (
         <Card onClick={() => setSelectedTopicIndex(props.index)}>
             <Title>{topic.name}</Title>
@@ -125,10 +126,16 @@ const TopicCard = (props) => {
 
 
 const NotesContent = (props) => {
+    const { content } = props;
 
+    // I *may* be able to... hm... have onClick handlers for this module-ized content so each one can be edited?
+    // Then it can pass up whatever it needs to for the 'main' component to update said content.
+    // So then this needs to know the Toolbar buttons and what they're up to... what else?
+    
     return (
-        <>
-        </>
+        <ContentContainer>
+            
+        </ContentContainer>
     )
 }
 
