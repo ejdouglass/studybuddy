@@ -9,6 +9,7 @@ const Notes = () => {
     const [newTopicName, setNewTopicName] = useState('');
     const [newTopicDesc, setNewTopicDesc] = useState('');
     const [words, setWords] = useState([]);
+    // New concept: textareas rule the world! 
     const initialLoad = useRef(true);
 
     function createNewTopic(e) {
@@ -86,7 +87,7 @@ const Notes = () => {
                     <RowContainer fullwidth>
                         <Button bold leftside onClick={() => setSelectedTopicIndex(undefined)}>Go Back</Button>
                     </RowContainer>
-                    <Title>{state?.notes[selectedTopicIndex].name}</Title>
+                    <Title>{state?.notes[selectedTopicIndex].name.toUpperCase()}</Title>
                     <Notepad>
                         <NotepadToolbar>
                             <NoteToolButton>HI</NoteToolButton>
@@ -200,5 +201,12 @@ export default Notes;
     -- Think through how you want to use it, backsolve.
     
     -- USING IT! I click on Notes. On Note page. Click the Topic. Default is "loose notes" for that topic? "Unsorted" is always the first Subtopic.
+
+    2/27/21 - 
+    Let's not get lost in the weeds. Simplify for now:
+    -- Each section is just "notes" by default, a textarea (of whatever size it needs to be), and when user hits "enter" it pops to the next section
+        -> Conditional behavior: selects next textarea in array to FOCUS, or if none, creates a new one and focuses that instead
+    -- User can enter different "modes" with the toolbar buttons (or shortcuts, if/when applicable)
+        -> 'Aside' mode: code snippets, quotes, definitions, etc. in self-styled and border-bounded boxes (probably separate font style)
 
 */

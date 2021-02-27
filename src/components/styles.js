@@ -440,7 +440,7 @@ export const TopicsContainer = styled(ContentContainer)`
 
 export const NotepadToolbar = styled(ContentContainer)`
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     padding: 4px;
     width: 100%;
     border-bottom: 1px solid ${colors.blackish};
