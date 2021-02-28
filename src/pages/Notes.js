@@ -13,10 +13,10 @@ const Notes = () => {
     /*
     topic.subtopics format:
     subtopics: [ { name: 'SUBTOPIC_NAME', content: [ {} ] } ],
-    ... we want to know which subtopic we're on, so we have access to that object's .content array
-    ... and of course, which CONTENT section we're focused on
-    ... yeah, trying to "stitch" multiple textareas together, or have different behaviors in different parts of a single textarea, is crazy messy right now.
-    ... Need another approach! Hmmm. Back to tabs, maybe, on the left side; a search fxn; individual notey-sections (textareas with distinct properties)
+    -- thinking just textareas all the way down, with little basic outline borders (maybe only top and bottom partials)
+    -- collapsibility would be good, so 'wrap' the content in a component below for display purposes (pass in object, which will include type)
+    -- each content object is a 'section' of notes, in its array: { title: '', text: '', type: '' } ... should cover it
+        -> typess: notes, ___
 
     So we can just have CONTENTARRAY.map((note, index) => (
         <Note key={index} type={note.type} />
@@ -32,8 +32,9 @@ const Notes = () => {
     [?] Is there a way to force the screen to scroll to a certain part of the page? Actually, there definitely is. Figure out how!
 
     [!] Handling keydowns
-        -- Basically, we want default textarea behavior *most* of the time, but custom behavior in some specific cases.
-        -- <ENTER> at the end of the textarea should create a new textarea following (pushing down any previously extant following textareas).
+        -- Eh, mostly just button shortcuts for now, I think. Each textarea/Note can support multiple lines reasonably enough.
+        -- Should each Note have its own title/header? Maybe.
+        -- Then we're looking at an INPUT with TITLE-like attributes in each Note, as well as the textarea.
 
     */
     const initialLoad = useRef(true);
@@ -44,7 +45,19 @@ const Notes = () => {
             // make new topic
             const newTopic = {
                 name: newTopicName,
-                description: newTopicDesc
+                description: newTopicDesc,
+                subtopics: [
+                    {
+                        name: 'Subtopic #1',
+                        content: [
+                            {
+                                title: 'Nameless Section',
+                                text: '',
+                                type: 'notes'
+                            }
+                        ]
+                    }
+                ]
             };
             dispatch({type: actions.ADD_A_TOPIC, payload: newTopic});
             setNewTopicName('');
@@ -119,7 +132,6 @@ const Notes = () => {
                             <NoteToolButton>HI</NoteToolButton>
                             <NoteToolButton>YO</NoteToolButton>
                         </NotepadToolbar>
-                        {/* Next confuddle -- where do I put the INPUT the user is currently editing? Seamlessly? */}
                         {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
                             <ContentContainer key={index}>
                                 {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
@@ -153,7 +165,11 @@ const TopicCard = (props) => {
 
 
 const NotesContent = (props) => {
-    const { content } = props;
+    const [section, setSection] = {
+        title: props.content.title || `Unnamed Section`,
+        text: props.content.text || '',
+        type: props.context.type || 'notes'
+    };
 
     // I *may* be able to... hm... have onClick handlers for this module-ized content so each one can be edited?
     // Then it can pass up whatever it needs to for the 'main' component to update said content.
@@ -161,7 +177,8 @@ const NotesContent = (props) => {
     
     return (
         <ContentContainer>
-            
+            <Text>{section.title}</Text>
+            <NoteSection placeholder={`Type here and make some brilliant notes for this section!`}></NoteSection>
         </ContentContainer>
     )
 }
@@ -197,6 +214,7 @@ export default Notes;
     -- Each index represents a 'topic' object:
     topic: {
         name: 'TOPIC_NAME',
+        description: '',
         subtopics: [ { name: 'SUBTOPIC_NAME', content: [ {} ] } ],
         resources: [ {} ],
         notes: [ { type: 'paragraph || header || bullets', content: [ 'word1', 'word2', '...' ] } ]
