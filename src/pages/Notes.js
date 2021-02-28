@@ -1,15 +1,41 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
+import { NoteSection, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
 
 const Notes = () => {
     const [state, dispatch] = useContext(Context);
-    const [selectedTopicIndex, setSelectedTopicIndex] = useState(undefined); 
+    const [selectedTopicIndex, setSelectedTopicIndex] = useState(undefined);
+    const [selectedSubtopicIndex, setSelectedSubtopicIndex] = useState(undefined);
+    const [selectedContentIndex, setSelectedContentIndex] = useState(undefined);
     const [newTopicName, setNewTopicName] = useState('');
     const [newTopicDesc, setNewTopicDesc] = useState('');
-    const [words, setWords] = useState([]);
-    // New concept: textareas rule the world! 
+    /*
+    topic.subtopics format:
+    subtopics: [ { name: 'SUBTOPIC_NAME', content: [ {} ] } ],
+    ... we want to know which subtopic we're on, so we have access to that object's .content array
+    ... and of course, which CONTENT section we're focused on
+    ... yeah, trying to "stitch" multiple textareas together, or have different behaviors in different parts of a single textarea, is crazy messy right now.
+    ... Need another approach! Hmmm. Back to tabs, maybe, on the left side; a search fxn; individual notey-sections (textareas with distinct properties)
+
+    So we can just have CONTENTARRAY.map((note, index) => (
+        <Note key={index} type={note.type} />
+    ))
+    ... so the object for each note can include a 'type' that is a prop that is used to dictate its styling from styled? Should work fine!
+    ... even if the Note component is written below, it can just have note={note} and have the type extracted and used in a styled component there
+    ... the link below lets us know what parts of the textarea are selected, but can we 'highlight' or reformat with that?? HRM.
+
+    [?] Is there a way to know programmatically where in the textarea a cursor is? 
+        -- This would REALLY help with keyboard stuff, like arrows up and down taking you through textareas and then into surrounding content properly
+        -- Aha: https://ourcodeworld.com/articles/read/282/how-to-get-the-current-cursor-position-and-selection-within-a-text-input-or-textarea-in-javascript
+
+    [?] Is there a way to force the screen to scroll to a certain part of the page? Actually, there definitely is. Figure out how!
+
+    [!] Handling keydowns
+        -- Basically, we want default textarea behavior *most* of the time, but custom behavior in some specific cases.
+        -- <ENTER> at the end of the textarea should create a new textarea following (pushing down any previously extant following textareas).
+
+    */
     const initialLoad = useRef(true);
 
     function createNewTopic(e) {

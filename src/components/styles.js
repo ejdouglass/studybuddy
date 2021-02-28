@@ -470,3 +470,14 @@ export const Notepad = styled(ContentContainer)`
 export const Word = styled(Text)`
     margin: 1.5rem;
 `;
+
+export const NoteSection = styled.textarea`
+    display: flex;
+    width: 100%;
+    padding: 1rem;
+    line-height: 1.5;
+    resize: none;
+    border: none;
+    font-size: 1.3rem;
+    font-family: sans-serif;
+`;
