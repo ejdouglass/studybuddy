@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { NoteSection, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
+import { NoteSection, NotepadNotes, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
 
 const Notes = () => {
     const [state, dispatch] = useContext(Context);
@@ -132,15 +132,18 @@ const Notes = () => {
                             <NoteToolButton>HI</NoteToolButton>
                             <NoteToolButton>YO</NoteToolButton>
                         </NotepadToolbar>
+                        <NotepadNotes>
                         {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
-                            <ContentContainer key={index}>
+                            <ContentContainer key={index} column fullwidth>
                                 {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
-                                <Title>subtopic.name</Title>
+                                <Title leftside>{subtopic.name}</Title>
                                 {subtopic.content.map((content, index) => (
-                                    <NotesContent key={index} content={content} />
+                                    <SectionOfNotes key={index} content={content} />
                                 ))}
                             </ContentContainer>
                         ))}
+                        <Button>MOAR SXNS</Button>
+                        </NotepadNotes>
                         
                     </Notepad>
                 </ColumnContainer>
@@ -164,21 +167,45 @@ const TopicCard = (props) => {
 
 
 
-const NotesContent = (props) => {
-    const [section, setSection] = {
+const SectionOfNotes = (props) => {
+    const [section, setSection] = useState({
         title: props.content.title || `Unnamed Section`,
         text: props.content.text || '',
-        type: props.context.type || 'notes'
-    };
+        type: props.content.type || 'notes'
+    });
+    const [containerHeight, setContainerHeight] = useState('auto');
+    const [sectionHeight, setSectionHeight] = useState('auto');
+    const textRef = useRef(null);
+
+    const containerStyle = {
+        minHeight: containerHeight
+    }
+
+    const sectionStyle = {
+        height: sectionHeight
+    }
+
+    function handleChange(e) {
+        setSectionHeight('auto');
+        setContainerHeight(`${textRef.current.scrollHeight}px`);
+        setSection({...section, text: e.target.value});
+    }
+
+    useEffect(() => {
+        setContainerHeight(`${textRef.current.scrollHeight}px`);
+        setSectionHeight(`${textRef.current.scrollHeight}px`);
+    }, [section.text]);
 
     // I *may* be able to... hm... have onClick handlers for this module-ized content so each one can be edited?
     // Then it can pass up whatever it needs to for the 'main' component to update said content.
     // So then this needs to know the Toolbar buttons and what they're up to... what else?
     
     return (
-        <ContentContainer>
-            <Text>{section.title}</Text>
-            <NoteSection placeholder={`Type here and make some brilliant notes for this section!`}></NoteSection>
+        // Probably at some point add the 'section differentiators' to this, changing ContentContainer up a bit most likely
+        // Can also tweak it to ensure we avoid scrolling issues and such
+        <ContentContainer column fullwidth style={containerStyle}>
+            <Text leftside>{section.title}</Text>
+            <NoteSection ref={textRef} style={sectionStyle} value={section.text} onChange={e => handleChange(e)} autoFocus={true} rows={1} placeholder={`(type some notes here)`}></NoteSection>
         </ContentContainer>
     )
 }

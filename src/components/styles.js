@@ -307,6 +307,12 @@ export const Title = styled.p`
     ${props => props.white && css`
         color: white;
     `}
+    ${props => props.leftside && css`
+        align-self: flex-start;
+    `}
+    ${props => props.rightside && css`
+        align-self: flex-end;
+    `}
 `;
 
 export const Text = styled.p`
@@ -458,13 +464,21 @@ export const NoteToolButton = styled(Button)`
 `;
 
 export const Notepad = styled(ContentContainer)`
-    flex-direction: row;
+    flex-direction: column;
     align-content: flex-start;
     flex-wrap: wrap;
     width: 85vw;
-    height: 60vh;
+    min-height: 60vh;
     border-radius: 10px;
     border: 2px solid ${colors.pale};
+`;
+
+export const NotepadNotes = styled(ContentContainer)`
+    padding: 1rem;
+    flex-direction: column;
+    align-content: flex-start;
+    flex-wrap: wrap;
+    width: 100%;
 `;
 
 export const Word = styled(Text)`
