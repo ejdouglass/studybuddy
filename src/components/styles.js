@@ -449,7 +449,8 @@ export const NotepadToolbar = styled(ContentContainer)`
     justify-content: center;
     padding: 4px;
     width: 100%;
-    border-bottom: 1px solid ${colors.blackish};
+    border-bottom: 1px solid ${colors.pale};
+    background-color: ${colors.blackish}
 `;
 
 export const NoteToolButton = styled(Button)`
@@ -468,9 +469,9 @@ export const Notepad = styled(ContentContainer)`
     align-content: flex-start;
     flex-wrap: wrap;
     width: 85vw;
-    min-height: 60vh;
-    border-radius: 10px;
-    border: 2px solid ${colors.pale};
+    min-height: 75vh;
+    border-radius: 0 0 10px 10px;
+    border: 1px solid ${colors.pale};
 `;
 
 export const NotepadNotes = styled(ContentContainer)`
@@ -485,6 +486,16 @@ export const Word = styled(Text)`
     margin: 1.5rem;
 `;
 
+export const NoteSectionTitle = styled(Input)`
+    outline: none;
+    border: none;
+    align-self: flex-start;
+    width: 300px;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-vertical: 0;
+`;
+
 export const NoteSection = styled.textarea`
     display: flex;
     width: 100%;
@@ -494,4 +505,15 @@ export const NoteSection = styled.textarea`
     border: none;
     font-size: 1.3rem;
     font-family: sans-serif;
+    color: ${colors.blackish};
+    background-color: hsl(230, 10%, 95%);
+    border-radius: 2px;
+`;
+
+export const CollapseButton = styled(Button)`
+    width: 30px;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 `;

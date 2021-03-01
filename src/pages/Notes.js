@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { NoteSection, NotepadNotes, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
+import { NoteSection, NoteSectionTitle, NotepadNotes, CollapseButton, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
 
 const Notes = () => {
     const [state, dispatch] = useContext(Context);
@@ -32,9 +32,7 @@ const Notes = () => {
     [?] Is there a way to force the screen to scroll to a certain part of the page? Actually, there definitely is. Figure out how!
 
     [!] Handling keydowns
-        -- Eh, mostly just button shortcuts for now, I think. Each textarea/Note can support multiple lines reasonably enough.
-        -- Should each Note have its own title/header? Maybe.
-        -- Then we're looking at an INPUT with TITLE-like attributes in each Note, as well as the textarea.
+        -- Mostly for NEW SECTIONS. It's silly to -have- to switch to mouse to do stuff like that.
 
     */
     const initialLoad = useRef(true);
@@ -68,6 +66,11 @@ const Notes = () => {
         }
     }
 
+    function addNewSection() {
+        // HERE: Add new section :P
+        //  -> considerations: Gotta reference the current topic index, and then we need to know the subtopic index (which currently isn't even set)
+    }
+
     useEffect(() => {
         if (!initialLoad.current) {
             save(state);
@@ -83,6 +86,7 @@ const Notes = () => {
     useEffect(() => {
         if (selectedTopicIndex !== undefined) {
             // A topic has been selected; act on that here, if applicable
+            setSelectedSubtopicIndex(0);
         }
     }, [selectedTopicIndex]);
 
@@ -138,7 +142,7 @@ const Notes = () => {
                                 {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
                                 <Title leftside>{subtopic.name}</Title>
                                 {subtopic.content.map((content, index) => (
-                                    <SectionOfNotes key={index} content={content} />
+                                    <SectionOfNotes key={index} content={content} selected={selectedSubtopicIndex === index ? true : false} />
                                 ))}
                             </ContentContainer>
                         ))}
@@ -196,15 +200,26 @@ const SectionOfNotes = (props) => {
         setSectionHeight(`${textRef.current.scrollHeight}px`);
     }, [section.text]);
 
+    // HERE: a sentinel useEffect that un-drills data back up to save changes to global state
+
     // I *may* be able to... hm... have onClick handlers for this module-ized content so each one can be edited?
     // Then it can pass up whatever it needs to for the 'main' component to update said content.
     // So then this needs to know the Toolbar buttons and what they're up to... what else?
+
+    // Copied the textarea-resizing from Googling results; figure out WHY it works and play with it
+
+    // Consider changing NoteSection to have a slightly different BG color?
     
     return (
         // Probably at some point add the 'section differentiators' to this, changing ContentContainer up a bit most likely
         // Can also tweak it to ensure we avoid scrolling issues and such
-        <ContentContainer column fullwidth style={containerStyle}>
-            <Text leftside>{section.title}</Text>
+
+        // Pretty brute-force way to show what's 'selected' atm, but later can change to a more subtle effect (background, slowly blinking border, etc.)
+        <ContentContainer column fullwidth style={containerStyle, {border: props.selected ? '1px solid red' : 'none'}}>
+            <RowContainer fullwidth style={{alignItems: 'center', padding: '0'}}>
+                <CollapseButton>-</CollapseButton>
+                <NoteSectionTitle style={{border: '1px solid hsl(230, 10%, 90%, 0.6)', borderRadius: '6px'}} type='text' value={section.title} onChange={e => setSection({...section, title: e.target.value})} placeholder={`(enter section title here)`}></NoteSectionTitle>
+            </RowContainer>
             <NoteSection ref={textRef} style={sectionStyle} value={section.text} onChange={e => handleChange(e)} autoFocus={true} rows={1} placeholder={`(type some notes here)`}></NoteSection>
         </ContentContainer>
     )
