@@ -12,7 +12,9 @@ export const actions = {
     LOAD_SAVED_DATA: 'load_saved_data',
     ALERT_USER: 'alert_user',
     DISMISS_ALERT: 'dismiss_alert',
-    ADD_A_TOPIC: 'add_a_topic'
+    ADD_A_TOPIC: 'add_a_topic',
+    ADD_A_NOTE_SECTION: 'add_a_note_section',
+    UPDATE_A_NOTE_SECTION: 'update_a_note_section'
 };
   
 export const Reducer = (state, action) => {
@@ -82,6 +84,15 @@ export const Reducer = (state, action) => {
             let newTopic = {...action.payload, subtopics: [{name: 'Unsorted Notes', content: []}]};
             let newNotes = [...state.notes, action.payload];
             return {...state, notes: newNotes};
+        
+        case actions.ADD_A_NOTE_SECTION:
+           let notesCopy = JSON.parse(JSON.stringify(state.notes));
+
+           notesCopy[action.payload.topicIndex].subtopics[action.payload.subTopicIndex].content.push(action.payload.content);
+           return {...state, notes: notesCopy};
+
+        case actions.UPDATE_A_NOTE_SECTION:
+            return state;
 
         default:
             return state;
@@ -102,7 +113,7 @@ const initialState = {
         font: 'default'
     },
     syllabus: [],
-    notes: [],
+    notes: [], // array of topics, with subtopics, with content
     alert: {type: 'info', message: '', startTime: undefined, duration: 0},
     backupAlerts: []
 }

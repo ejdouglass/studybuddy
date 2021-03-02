@@ -7,7 +7,7 @@ const Notes = () => {
     const [state, dispatch] = useContext(Context);
     const [selectedTopicIndex, setSelectedTopicIndex] = useState(undefined);
     const [selectedSubtopicIndex, setSelectedSubtopicIndex] = useState(undefined);
-    const [selectedContentIndex, setSelectedContentIndex] = useState(undefined);
+    const [selectedSectionIndex, setSelectedSectionIndex] = useState(undefined);
     const [newTopicName, setNewTopicName] = useState('');
     const [newTopicDesc, setNewTopicDesc] = useState('');
     /*
@@ -49,7 +49,7 @@ const Notes = () => {
                         name: 'Subtopic #1',
                         content: [
                             {
-                                title: 'Nameless Section',
+                                title: 'Note Section #1',
                                 text: '',
                                 type: 'notes'
                             }
@@ -68,7 +68,26 @@ const Notes = () => {
 
     function addNewSection() {
         // HERE: Add new section :P
-        //  -> considerations: Gotta reference the current topic index, and then we need to know the subtopic index (which currently isn't even set)
+        // Basically just push a new entry onto the notes.topic.subtopic array with default values and set its index to the current one.
+        // BONUS: Zoomies to that entry
+
+        // I just now realized that I'm directly referencing global state the entire time to render everything. Interesting choice. :P
+        // Not completely wackadoo, since every change would be saved directly into global state immediately anyway...
+        // For a more nuanced program, we'd probably stick with local state, with changes more periodically/intentionally pushed.
+        // For now we'll just do DISPATCH HIJINKS...
+
+        // topic is array, subtopic is array, each subtopic has content that is 'title, text, type'
+        
+        const payload = {
+            topicIndex: selectedTopicIndex,
+            subTopicIndex: selectedSubtopicIndex,
+            content: {
+                title: `Note Section #${state.notes[selectedTopicIndex].subtopics[selectedSubtopicIndex].content.length + 1}`,
+                text: ``,
+                type: 'notes'
+            }
+        }; // We need to know the current TOPIC INDEX and SUBTOPIC INDEX... might as well define defaults as well
+        dispatch({type: actions.ADD_A_NOTE_SECTION, payload: payload});
     }
 
     useEffect(() => {
@@ -89,6 +108,11 @@ const Notes = () => {
             setSelectedSubtopicIndex(0);
         }
     }, [selectedTopicIndex]);
+
+    useEffect(() => {
+        // HERE: Save global state when user does something
+        // ... awkwardly, there's no central repository of 'note' content, so I'll have to make an 'extra' state above to check against?
+    }, []);
 
     return (
         <PageContainer>
@@ -142,11 +166,11 @@ const Notes = () => {
                                 {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
                                 <Title leftside>{subtopic.name}</Title>
                                 {subtopic.content.map((content, index) => (
-                                    <SectionOfNotes key={index} content={content} selected={selectedSubtopicIndex === index ? true : false} />
+                                    <SectionOfNotes key={index} content={content} state={state} index={index} setSelectedSectionIndex={setSelectedSectionIndex} selected={selectedSectionIndex === index ? true : false} />
                                 ))}
                             </ContentContainer>
                         ))}
-                        <Button>MOAR SXNS</Button>
+                        <Button onClick={addNewSection}>MOAR SXNS</Button>
                         </NotepadNotes>
                         
                     </Notepad>
@@ -172,6 +196,7 @@ const TopicCard = (props) => {
 
 
 const SectionOfNotes = (props) => {
+    const [state, dispatch] = useContext(Context);
     const [section, setSection] = useState({
         title: props.content.title || `Unnamed Section`,
         text: props.content.text || '',
@@ -200,11 +225,11 @@ const SectionOfNotes = (props) => {
         setSectionHeight(`${textRef.current.scrollHeight}px`);
     }, [section.text]);
 
-    // HERE: a sentinel useEffect that un-drills data back up to save changes to global state
+    useEffect(() => {
+        // HERE: Add 'save what's going on to global state' because why would we not... :P
+    }, [section]);
 
-    // I *may* be able to... hm... have onClick handlers for this module-ized content so each one can be edited?
-    // Then it can pass up whatever it needs to for the 'main' component to update said content.
-    // So then this needs to know the Toolbar buttons and what they're up to... what else?
+    // ADD: Some 'sensor' to indicate this section is currently FOCUSED, with whatever functionality comes with that
 
     // Copied the textarea-resizing from Googling results; figure out WHY it works and play with it
 
@@ -215,12 +240,12 @@ const SectionOfNotes = (props) => {
         // Can also tweak it to ensure we avoid scrolling issues and such
 
         // Pretty brute-force way to show what's 'selected' atm, but later can change to a more subtle effect (background, slowly blinking border, etc.)
-        <ContentContainer column fullwidth style={containerStyle, {border: props.selected ? '1px solid red' : 'none'}}>
+        <ContentContainer column fullwidth style={containerStyle, {border: props.selected ? '1px solid hsla(230, 35%, 80%, 0.7)' : 'none'}} onClick={() => props.setSelectedSectionIndex(props.index)}>
             <RowContainer fullwidth style={{alignItems: 'center', padding: '0'}}>
                 <CollapseButton>-</CollapseButton>
                 <NoteSectionTitle style={{border: '1px solid hsl(230, 10%, 90%, 0.6)', borderRadius: '6px'}} type='text' value={section.title} onChange={e => setSection({...section, title: e.target.value})} placeholder={`(enter section title here)`}></NoteSectionTitle>
             </RowContainer>
-            <NoteSection ref={textRef} style={sectionStyle} value={section.text} onChange={e => handleChange(e)} autoFocus={true} rows={1} placeholder={`(type some notes here)`}></NoteSection>
+            <NoteSection ref={textRef} style={sectionStyle} value={section.text} onChange={e => handleChange(e)} autoFocus={true} rows={1} placeholder={`(type some notes here)`} onFocus={() => props.setSelectedSectionIndex(props.index)}></NoteSection>
         </ContentContainer>
     )
 }
