@@ -5,7 +5,9 @@ import styled, { keyframes, css } from 'styled-components';
 const colors = {
     base: 'hsla(230, 70%, 35%, 1)',
     pale: 'hsla(230, 70%, 35%, 0.3)',
-    blackish: 'hsla(230, 70%, 25%, 1)'
+    blackish: 'hsla(230, 70%, 25%, 1)',
+    bold: 'hsla(340, 60%, 50%, 1)',
+    purple: 'hsla(300, 85%, 25%, 1)'
 }
 
 const materializeIn = keyframes`
@@ -458,7 +460,7 @@ export const NoteToolButton = styled(Button)`
     padding: 0;
     width: 50px;
     height: 50px;
-    background-color: ${colors.base};
+    background-color: ${colors.purple};
     &:hover {
         transform: translateY(-1px);
     }
@@ -476,6 +478,7 @@ export const Notepad = styled(ContentContainer)`
 
 export const NotepadNotes = styled(ContentContainer)`
     padding: 1rem;
+    padding-top: 0;
     flex-direction: column;
     align-content: flex-start;
     flex-wrap: wrap;
@@ -527,4 +530,22 @@ export const CollapseButton = styled(Button)`
         color: black;
         background-color: hsl(230, 40%, 75%);
     }
+`;
+
+export const SubtopicTab = styled(Title)`
+    background-color: hsla(300, 85%, 25%, 0.5);
+    margin: 0.5rem;
+    color: white;
+    padding: 16px;
+    border-radius: 12px 12px 0 0;
+    &:first-child {
+        margin-left: 1rem;
+    }
+    ${props => props.selected && css`
+        background-color: hsla(300, 85%, 25%, 1);
+    `}
+    ${props => props.add && css`
+        background-color: ${colors.bold};
+        margin: 1rem;
+    `}
 `;

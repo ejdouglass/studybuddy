@@ -1,12 +1,12 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Context, actions } from '../context/context';
 import { save } from '../functions/globalfxns';
-import { NoteSection, NoteSectionTitle, NotepadNotes, CollapseButton, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
+import { SubtopicTab, NoteSection, NoteSectionTitle, NotepadNotes, CollapseButton, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
 
 const Notes = () => {
     const [state, dispatch] = useContext(Context);
     const [selectedTopicIndex, setSelectedTopicIndex] = useState(undefined);
-    const [selectedSubtopicIndex, setSelectedSubtopicIndex] = useState(undefined);
+    const [selectedSubtopicIndex, setSelectedSubtopicIndex] = useState(0);
     const [selectedSectionIndex, setSelectedSectionIndex] = useState(undefined);
     const [newTopicName, setNewTopicName] = useState('');
     const [newTopicDesc, setNewTopicDesc] = useState('');
@@ -90,6 +90,14 @@ const Notes = () => {
         dispatch({type: actions.ADD_A_NOTE_SECTION, payload: payload});
     }
 
+    function addNewSubtopic() {
+        const payload = {
+            topicIndex: selectedTopicIndex,
+            newSubtopicName: `Subtopic #${state.notes[selectedTopicIndex].subtopics.length + 1}`
+        };
+        dispatch({type: actions.ADD_A_SUBTOPIC, payload: payload});
+    }
+
     useEffect(() => {
         if (!initialLoad.current) {
             save(state);
@@ -160,16 +168,18 @@ const Notes = () => {
                             <NoteToolButton>HI</NoteToolButton>
                             <NoteToolButton>YO</NoteToolButton>
                         </NotepadToolbar>
+                        <RowContainer fullwidth>
+                            {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
+                                <SubtopicTab roomy selected={index === selectedSubtopicIndex ? true : false} key={index} onClick={() => setSelectedSubtopicIndex(index)}>{subtopic.name}</SubtopicTab>
+                            ))}
+                            <SubtopicTab add onClick={addNewSubtopic}>Add +</SubtopicTab>
+                        </RowContainer>
                         <NotepadNotes>
-                        {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
-                            <ContentContainer key={index} column fullwidth>
-                                {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
-                                <Title leftside>{subtopic.name}</Title>
-                                {subtopic.content.map((content, index) => (
+                            <ContentContainer column fullwidth>
+                                {state?.notes[selectedTopicIndex]?.subtopics[selectedSubtopicIndex]?.content.map((content, index) => (
                                     <SectionOfNotes key={index} content={content} state={state} topicIndex={selectedTopicIndex} subTopicIndex={selectedSubtopicIndex} index={index} setSelectedSectionIndex={setSelectedSectionIndex} selected={selectedSectionIndex === index ? true : false} />
                                 ))}
                             </ContentContainer>
-                        ))}
                         <Button leftside onClick={addNewSection}>Add Note Section</Button>
                         </NotepadNotes>
                         

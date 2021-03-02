@@ -14,7 +14,8 @@ export const actions = {
     DISMISS_ALERT: 'dismiss_alert',
     ADD_A_TOPIC: 'add_a_topic',
     ADD_A_NOTE_SECTION: 'add_a_note_section',
-    UPDATE_A_NOTE_SECTION: 'update_a_note_section'
+    UPDATE_A_NOTE_SECTION: 'update_a_note_section',
+    ADD_A_SUBTOPIC: 'add_a_subtopic'
 };
   
 export const Reducer = (state, action) => {
@@ -100,6 +101,15 @@ export const Reducer = (state, action) => {
                 type: action.payload.type
             };
             return {...state, notes: newSxnNotes};
+
+        case actions.ADD_A_SUBTOPIC:
+            let newSubtopicNotes = JSON.parse(JSON.stringify(state.notes));
+            const newSubtopic = {
+                name: action.payload.newSubtopicName,
+                content: [ { title: `Note Section #1`, text: ``, type: 'notes' } ]
+            }
+            newSubtopicNotes[action.payload.topicIndex].subtopics.push(newSubtopic);
+            return {...state, notes: newSubtopicNotes};
 
         default:
             return state;
