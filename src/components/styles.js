@@ -468,7 +468,7 @@ export const Notepad = styled(ContentContainer)`
     flex-direction: column;
     align-content: flex-start;
     flex-wrap: wrap;
-    width: 85vw;
+    width: 95vw;
     min-height: 75vh;
     border-radius: 0 0 10px 10px;
     border: 1px solid ${colors.pale};
@@ -499,21 +499,32 @@ export const NoteSectionTitle = styled(Input)`
 export const NoteSection = styled.textarea`
     display: flex;
     width: 100%;
-    padding: 1rem;
+    padding: 16px;
     line-height: 1.5;
     resize: none;
     border: none;
-    font-size: 1.3rem;
+    font-size: 1.2rem;
     font-family: sans-serif;
     color: ${colors.blackish};
     background-color: hsl(230, 10%, 95%);
     border-radius: 2px;
+    ${props => props.selected && css`
+        border: 1px solid ${colors.blackish};
+        padding: 15px;
+    `}
 `;
 
 export const CollapseButton = styled(Button)`
     width: 30px;
     height: 30px;
     display: flex;
+    margin-left: 1rem;
+    margin-right: 0;
     justify-content: center;
     align-items: center;
+    &:hover {
+        transform: translateY(-1px);
+        color: black;
+        background-color: hsl(230, 40%, 75%);
+    }
 `;

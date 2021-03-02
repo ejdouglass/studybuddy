@@ -81,6 +81,7 @@ export const Reducer = (state, action) => {
             return {...state, sessions: newSessionCollection};
 
         case actions.ADD_A_TOPIC:
+            // I don't get what's going on here anymore :P
             let newTopic = {...action.payload, subtopics: [{name: 'Unsorted Notes', content: []}]};
             let newNotes = [...state.notes, action.payload];
             return {...state, notes: newNotes};
@@ -92,7 +93,13 @@ export const Reducer = (state, action) => {
            return {...state, notes: notesCopy};
 
         case actions.UPDATE_A_NOTE_SECTION:
-            return state;
+            let newSxnNotes = JSON.parse(JSON.stringify(state.notes));
+            newSxnNotes[action.payload.topicIndex].subtopics[action.payload.subTopicIndex].content[action.payload.sectionIndex] = {
+                title: action.payload.title,
+                text: action.payload.text,
+                type: action.payload.type
+            };
+            return {...state, notes: newSxnNotes};
 
         default:
             return state;

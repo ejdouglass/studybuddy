@@ -166,11 +166,11 @@ const Notes = () => {
                                 {/* Later on, let's change this TITLE into a boopable entity to collapse and such */}
                                 <Title leftside>{subtopic.name}</Title>
                                 {subtopic.content.map((content, index) => (
-                                    <SectionOfNotes key={index} content={content} state={state} index={index} setSelectedSectionIndex={setSelectedSectionIndex} selected={selectedSectionIndex === index ? true : false} />
+                                    <SectionOfNotes key={index} content={content} state={state} topicIndex={selectedTopicIndex} subTopicIndex={selectedSubtopicIndex} index={index} setSelectedSectionIndex={setSelectedSectionIndex} selected={selectedSectionIndex === index ? true : false} />
                                 ))}
                             </ContentContainer>
                         ))}
-                        <Button onClick={addNewSection}>MOAR SXNS</Button>
+                        <Button leftside onClick={addNewSection}>Add Note Section</Button>
                         </NotepadNotes>
                         
                     </Notepad>
@@ -204,7 +204,9 @@ const SectionOfNotes = (props) => {
     });
     const [containerHeight, setContainerHeight] = useState('auto');
     const [sectionHeight, setSectionHeight] = useState('auto');
+    const [collapsed, setCollapsed] = useState(false);
     const textRef = useRef(null);
+    const firstLoad = useRef(true);
 
     const containerStyle = {
         minHeight: containerHeight
@@ -226,10 +228,18 @@ const SectionOfNotes = (props) => {
     }, [section.text]);
 
     useEffect(() => {
-        // HERE: Add 'save what's going on to global state' because why would we not... :P
+        if (firstLoad.current) firstLoad.current = false
+        else {
+            const updatedSectionData = {
+                ...section,
+                topicIndex: props.topicIndex,
+                subTopicIndex: props.subTopicIndex,
+                sectionIndex: props.index
+            };
+            dispatch({type: actions.UPDATE_A_NOTE_SECTION, payload: updatedSectionData});
+        }
     }, [section]);
 
-    // ADD: Some 'sensor' to indicate this section is currently FOCUSED, with whatever functionality comes with that
 
     // Copied the textarea-resizing from Googling results; figure out WHY it works and play with it
 
@@ -239,13 +249,12 @@ const SectionOfNotes = (props) => {
         // Probably at some point add the 'section differentiators' to this, changing ContentContainer up a bit most likely
         // Can also tweak it to ensure we avoid scrolling issues and such
 
-        // Pretty brute-force way to show what's 'selected' atm, but later can change to a more subtle effect (background, slowly blinking border, etc.)
-        <ContentContainer column fullwidth style={containerStyle, {border: props.selected ? '1px solid hsla(230, 35%, 80%, 0.7)' : 'none'}} onClick={() => props.setSelectedSectionIndex(props.index)}>
+        <ContentContainer column fullwidth style={containerStyle, {backgroundColor: props.selected ? 'hsla(230, 35%, 80%, 0.7)' : 'white'}} onClick={() => props.setSelectedSectionIndex(props.index)}>
             <RowContainer fullwidth style={{alignItems: 'center', padding: '0'}}>
-                <CollapseButton>-</CollapseButton>
+                <CollapseButton onClick={() => setCollapsed(collapsed => !collapsed)}>{collapsed ? '+' : '-'}</CollapseButton>
                 <NoteSectionTitle style={{border: '1px solid hsl(230, 10%, 90%, 0.6)', borderRadius: '6px'}} type='text' value={section.title} onChange={e => setSection({...section, title: e.target.value})} placeholder={`(enter section title here)`}></NoteSectionTitle>
             </RowContainer>
-            <NoteSection ref={textRef} style={sectionStyle} value={section.text} onChange={e => handleChange(e)} autoFocus={true} rows={1} placeholder={`(type some notes here)`} onFocus={() => props.setSelectedSectionIndex(props.index)}></NoteSection>
+            <NoteSection ref={textRef} selected={props.selected} style={{...sectionStyle, display: collapsed ? 'none' : 'block'}} value={section.text} onChange={e => handleChange(e)} autoFocus={true} rows={1} placeholder={`(type some notes here)`} onFocus={() => props.setSelectedSectionIndex(props.index)}></NoteSection>
         </ContentContainer>
     )
 }
