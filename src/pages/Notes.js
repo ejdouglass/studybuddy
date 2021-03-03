@@ -110,6 +110,15 @@ const Notes = () => {
         dispatch({type: actions.UPDATE_TOPIC_PARAM, payload: payload});
     }
 
+    function updateSubtopicName(newName) {
+        const payload = {
+            topicIndex: selectedTopicIndex,
+            subtopicIndex: selectedSubtopicIndex,
+            newName: newName
+        };
+        dispatch({type: actions.UPDATE_A_SUBTOPIC, payload: payload});
+    }
+
     useEffect(() => {
         if (!initialLoad.current) {
             save(state);
@@ -183,9 +192,9 @@ const Notes = () => {
                         </NotepadToolbar>
                         <RowContainer fullwidth>
                             {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
-                                <SubtopicTab roomy selected={index === selectedSubtopicIndex ? true : false} key={index} onClick={() => setSelectedSubtopicIndex(index)}>{subtopic.name}</SubtopicTab>
+                                <SubtopicTab type='text' value={subtopic.name} onChange={e => updateSubtopicName(e.target.value)} selected={index === selectedSubtopicIndex ? true : false} key={index} onClick={() => setSelectedSubtopicIndex(index)}></SubtopicTab>
                             ))}
-                            <SubtopicTab add onClick={addNewSubtopic}>Add +</SubtopicTab>
+                            <SubtopicTab add value={'Add +'} onClick={addNewSubtopic}></SubtopicTab>
                         </RowContainer>
                         <NotepadNotes>
                             <ContentContainer column fullwidth>

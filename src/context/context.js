@@ -16,6 +16,7 @@ export const actions = {
     ADD_A_NOTE_SECTION: 'add_a_note_section',
     UPDATE_A_NOTE_SECTION: 'update_a_note_section',
     ADD_A_SUBTOPIC: 'add_a_subtopic',
+    UPDATE_A_SUBTOPIC: 'update_a_subtopic',
     UPDATE_TOPIC_PARAM: 'update_topic_param'
 };
   
@@ -136,6 +137,14 @@ export const Reducer = (state, action) => {
             let newTopicParamNotes = JSON.parse(JSON.stringify(state.notes));
             newTopicParamNotes[action.payload.topicIndex][action.payload.editTarget] = action.payload.editContent;
             return {...state, notes: newTopicParamNotes};
+        }
+
+        case actions.UPDATE_A_SUBTOPIC: {
+            // Gotta know topicIndex, subtopicIndex, and the new name of this bad boy via payload
+            let notesCopy = JSON.parse(JSON.stringify(state.notes));
+            const { payload } = action;
+            notesCopy[payload.topicIndex].subtopics[payload.subtopicIndex].name = payload.newName;
+            return {...state, notes: notesCopy};
         }
 
         default: {

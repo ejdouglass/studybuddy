@@ -543,9 +543,13 @@ export const CollapseButton = styled(Button)`
     }
 `;
 
-export const SubtopicTab = styled(Title)`
+export const SubtopicTab = styled(Input)`
     background-color: hsla(300, 85%, 25%, 0.5);
     font-weight: 400;
+    border: 0;
+    outline: 0;
+    text-align: center;
+    font-size: 1.5rem;
     margin: 0.5rem;
     width: 20vw;
     color: white;
@@ -561,6 +565,6 @@ export const SubtopicTab = styled(Title)`
     ${props => props.add && css`
         background-color: ${colors.bold};
         margin: 1rem;
-        width: auto;
+        width: 6rem;
     `}
 `;
