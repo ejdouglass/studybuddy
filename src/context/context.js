@@ -21,11 +21,12 @@ export const actions = {
   
 export const Reducer = (state, action) => {
     switch (action.type) {
-        case actions.ADD_NEW_CARD:
+        case actions.ADD_NEW_CARD: {
             let newCardPile = [...state.cards, action.payload];
             return {...state, cards: newCardPile};
+        }
 
-        case actions.EDIT_A_CARD:
+        case actions.EDIT_A_CARD: {
             // Edits a single card. However, it does NOT currently update this card in various decks. Whoops! It probably should. :P
             let decksCopy = JSON.parse(JSON.stringify(state.decks));
             for (let i = 0; i < decksCopy.length; i++) {
@@ -38,8 +39,9 @@ export const Reducer = (state, action) => {
             let modCards = JSON.parse(JSON.stringify(state.cards));
             modCards[action.payload.index] = action.payload.card;
             return {...state, cards: modCards, decks: decksCopy};
+        }
 
-        case actions.REMOVE_A_CARD:
+        case actions.REMOVE_A_CARD: {
             // Receives the card's ID as payload
             let updatedDecks = [...state.decks];
             for (let i = 0; i < state.decks.length; i++) {
@@ -47,54 +49,65 @@ export const Reducer = (state, action) => {
             }
             console.log(updatedDecks); // Yyyyeah this is just an empty array so it erases all decks, whoops :P
             return {...state, cards: state.cards.filter(card => card.id !== action.payload), decks: updatedDecks};
+        }
 
-        case actions.REMOVE_A_DECK:
+        case actions.REMOVE_A_DECK: {
             return {...state, decks: state.decks.filter(deck => deck.id !== action.payload)};
+        }
 
-        case actions.EDIT_A_DECK:
+        case actions.EDIT_A_DECK: {
             // Gimme a deck index and a new deck, like edit-a-card, and I'll get to work.
             let modDecks = JSON.parse(JSON.stringify(state.decks));
             modDecks[action.payload.index] = action.payload.deck;
             return {...state, decks: modDecks};
+        }
 
-        case actions.ADD_NEW_DECK:
+        case actions.ADD_NEW_DECK: {
             let newDeckPile = [...state.decks, action.payload];
             return {...state, decks: newDeckPile};
+        }
 
-        case actions.UPDATE_WHATDO:
+        case actions.UPDATE_WHATDO: {
             // We'll test it out, but we're expecting a payload object with page URL and currentAction object, if applicable
             // Specifically, page and currentAction
             return {...state, whatdo: action.payload};
+        }
 
-        case actions.LOAD_SAVED_DATA:
+        case actions.LOAD_SAVED_DATA: {
             return action.payload;
+        }
 
-        case actions.ALERT_USER:
+        case actions.ALERT_USER: {
             let alert = action.payload;
             if (!alert.duration) alert.duration = 10;
             if (!alert.type) alert.type = 'info';
             return {...state, alert: alert};
+        }
         
-        case actions.DISMISS_ALERT:
+        case actions.DISMISS_ALERT: {
             return {...state, alert: {type: 'info', message: '', startTime: undefined, duration: 0}};
+        }
 
-        case actions.ADD_NEW_SESSION:
+        case actions.ADD_NEW_SESSION: {
             let newSessionCollection = [...state.sessions, action.payload];
             return {...state, sessions: newSessionCollection};
+        }
 
-        case actions.ADD_A_TOPIC:
+        case actions.ADD_A_TOPIC: {
             // I don't really know why newTopic is here. Doesn't seem to do anything, so we'll just comment it out for now.
             // let newTopic = {...action.payload, subtopics: [{name: 'Unsorted Notes', content: []}]};
             let newNotes = [...state.notes, action.payload];
             return {...state, notes: newNotes};
+        }
         
-        case actions.ADD_A_NOTE_SECTION:
+        case actions.ADD_A_NOTE_SECTION: {
             let notesCopy = JSON.parse(JSON.stringify(state.notes));
 
             notesCopy[action.payload.topicIndex].subtopics[action.payload.subTopicIndex].content.push(action.payload.content);
             return {...state, notes: notesCopy};
+        }
 
-        case actions.UPDATE_A_NOTE_SECTION:
+        case actions.UPDATE_A_NOTE_SECTION: {
             let newSxnNotes = JSON.parse(JSON.stringify(state.notes));
             newSxnNotes[action.payload.topicIndex].subtopics[action.payload.subTopicIndex].content[action.payload.sectionIndex] = {
                 title: action.payload.title,
@@ -103,8 +116,9 @@ export const Reducer = (state, action) => {
                 id: action.payload.id
             };
             return {...state, notes: newSxnNotes};
+        }
 
-        case actions.ADD_A_SUBTOPIC:
+        case actions.ADD_A_SUBTOPIC: {
             // This may be the buggy bit? Not sure. New subtopics 'copy' the first one's.
             let newSubtopicNotes = JSON.parse(JSON.stringify(state.notes));
             const newSubtopic = {
@@ -115,15 +129,18 @@ export const Reducer = (state, action) => {
             newSubtopicNotes[action.payload.topicIndex].subtopics.push(newSubtopic);
             console.log(`NEW notes: ${JSON.stringify(newSubtopicNotes)}`)
             return {...state, notes: newSubtopicNotes};
+        }
         
-        case actions.UPDATE_TOPIC_PARAM:
+        case actions.UPDATE_TOPIC_PARAM: {
             // Need the array of the topic in NOTES, the target to edit (name or description), and the new content
             let newTopicParamNotes = JSON.parse(JSON.stringify(state.notes));
             newTopicParamNotes[action.payload.topicIndex][action.payload.editTarget] = action.payload.editContent;
             return {...state, notes: newTopicParamNotes};
+        }
 
-        default:
+        default: {
             return state;
+        }
     }
 }
 
