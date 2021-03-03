@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import { Context, actions } from '../context/context';
-import { save } from '../functions/globalfxns';
-import { SubtopicTab, NoteSection, NoteSectionTitle, NotepadNotes, CollapseButton, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
+import { save, randoID } from '../functions/globalfxns';
+import { SubtopicTab, TopicName, NoteSection, NoteSectionTitle, NotepadNotes, CollapseButton, PageContainer, RowContainer, Card, ColumnContainer, Form, Text, Title, Button, Input, TopicsContainer, Notepad, Word, NotepadToolbar, NoteToolButton, ContentContainer } from '../components/styles';
 
 const Notes = () => {
     const [state, dispatch] = useContext(Context);
@@ -42,7 +42,7 @@ const Notes = () => {
         if (newTopicName.length > 0) {
             // make new topic
             const newTopic = {
-                name: newTopicName,
+                name: newTopicName.toUpperCase(),
                 description: newTopicDesc,
                 subtopics: [
                     {
@@ -51,7 +51,8 @@ const Notes = () => {
                             {
                                 title: 'Note Section #1',
                                 text: '',
-                                type: 'notes'
+                                type: 'notes',
+                                id: randoID()
                             }
                         ]
                     }
@@ -84,7 +85,8 @@ const Notes = () => {
             content: {
                 title: `Note Section #${state.notes[selectedTopicIndex].subtopics[selectedSubtopicIndex].content.length + 1}`,
                 text: ``,
-                type: 'notes'
+                type: 'notes',
+                id: randoID()
             }
         }; // We need to know the current TOPIC INDEX and SUBTOPIC INDEX... might as well define defaults as well
         dispatch({type: actions.ADD_A_NOTE_SECTION, payload: payload});
@@ -93,9 +95,19 @@ const Notes = () => {
     function addNewSubtopic() {
         const payload = {
             topicIndex: selectedTopicIndex,
-            newSubtopicName: `Subtopic #${state.notes[selectedTopicIndex].subtopics.length + 1}`
+            newSubtopicName: `Subtopic #${state.notes[selectedTopicIndex].subtopics.length + 1}`,
+            id: randoID()
         };
         dispatch({type: actions.ADD_A_SUBTOPIC, payload: payload});
+    }
+
+    function updateTitle(newTitle) {
+        const payload = {
+            topicIndex: selectedTopicIndex,
+            editTarget: 'name',
+            editContent: newTitle.toUpperCase()
+        };
+        dispatch({type: actions.UPDATE_TOPIC_PARAM, payload: payload});
     }
 
     useEffect(() => {
@@ -161,12 +173,13 @@ const Notes = () => {
                 <ColumnContainer fullwidth>
                     <RowContainer fullwidth>
                         <Button bold leftside onClick={() => setSelectedTopicIndex(undefined)}>Go Back</Button>
+                        <TopicName type='text' value={state?.notes[selectedTopicIndex].name.toUpperCase()} onChange={e => updateTitle(e.target.value)}></TopicName>
                     </RowContainer>
-                    <Title>{state?.notes[selectedTopicIndex].name.toUpperCase()}</Title>
+
                     <Notepad>
                         <NotepadToolbar>
-                            <NoteToolButton>HI</NoteToolButton>
-                            <NoteToolButton>YO</NoteToolButton>
+                            <NoteToolButton>AB</NoteToolButton>
+                            <NoteToolButton>YZ</NoteToolButton>
                         </NotepadToolbar>
                         <RowContainer fullwidth>
                             {state?.notes[selectedTopicIndex]?.subtopics?.map((subtopic, index) => (
@@ -176,8 +189,10 @@ const Notes = () => {
                         </RowContainer>
                         <NotepadNotes>
                             <ContentContainer column fullwidth>
+                                {/* AHA! It's the KEY that needs to be unique, but it's not, because changing the above doesn't change the unique key. Probably. */}
+                                {/* Fixed it by changing the key to be unique (content.title + content.text), but having a changing key makes... odd errors */}
                                 {state?.notes[selectedTopicIndex]?.subtopics[selectedSubtopicIndex]?.content.map((content, index) => (
-                                    <SectionOfNotes key={index} content={content} state={state} topicIndex={selectedTopicIndex} subTopicIndex={selectedSubtopicIndex} index={index} setSelectedSectionIndex={setSelectedSectionIndex} selected={selectedSectionIndex === index ? true : false} />
+                                    <SectionOfNotes key={content.id} content={content} state={state} topicIndex={selectedTopicIndex} subTopicIndex={selectedSubtopicIndex} index={index} setSelectedSectionIndex={setSelectedSectionIndex} selected={selectedSectionIndex === index ? true : false} />
                                 ))}
                             </ContentContainer>
                         <Button leftside onClick={addNewSection}>Add Note Section</Button>
@@ -210,7 +225,8 @@ const SectionOfNotes = (props) => {
     const [section, setSection] = useState({
         title: props.content.title || `Unnamed Section`,
         text: props.content.text || '',
-        type: props.content.type || 'notes'
+        type: props.content.type || 'notes',
+        id: props.content.id
     });
     const [containerHeight, setContainerHeight] = useState('auto');
     const [sectionHeight, setSectionHeight] = useState('auto');

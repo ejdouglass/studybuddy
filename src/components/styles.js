@@ -499,6 +499,17 @@ export const NoteSectionTitle = styled(Input)`
     margin-vertical: 0;
 `;
 
+export const TopicName = styled(Input)`
+    outline: none;
+    border: none;
+    align-self: flex-start;
+    font-weight: 700;
+    font-size: 2rem;
+    width: 50%;
+    margin: 8px;
+    padding: 0;
+`;
+
 export const NoteSection = styled.textarea`
     display: flex;
     width: 100%;
@@ -534,7 +545,9 @@ export const CollapseButton = styled(Button)`
 
 export const SubtopicTab = styled(Title)`
     background-color: hsla(300, 85%, 25%, 0.5);
+    font-weight: 400;
     margin: 0.5rem;
+    width: 20vw;
     color: white;
     padding: 16px;
     border-radius: 12px 12px 0 0;
@@ -543,9 +556,11 @@ export const SubtopicTab = styled(Title)`
     }
     ${props => props.selected && css`
         background-color: hsla(300, 85%, 25%, 1);
+        font-weight: 700;
     `}
     ${props => props.add && css`
         background-color: ${colors.bold};
         margin: 1rem;
+        width: auto;
     `}
 `;

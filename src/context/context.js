@@ -15,7 +15,8 @@ export const actions = {
     ADD_A_TOPIC: 'add_a_topic',
     ADD_A_NOTE_SECTION: 'add_a_note_section',
     UPDATE_A_NOTE_SECTION: 'update_a_note_section',
-    ADD_A_SUBTOPIC: 'add_a_subtopic'
+    ADD_A_SUBTOPIC: 'add_a_subtopic',
+    UPDATE_TOPIC_PARAM: 'update_topic_param'
 };
   
 export const Reducer = (state, action) => {
@@ -82,34 +83,44 @@ export const Reducer = (state, action) => {
             return {...state, sessions: newSessionCollection};
 
         case actions.ADD_A_TOPIC:
-            // I don't get what's going on here anymore :P
-            let newTopic = {...action.payload, subtopics: [{name: 'Unsorted Notes', content: []}]};
+            // I don't really know why newTopic is here. Doesn't seem to do anything, so we'll just comment it out for now.
+            // let newTopic = {...action.payload, subtopics: [{name: 'Unsorted Notes', content: []}]};
             let newNotes = [...state.notes, action.payload];
             return {...state, notes: newNotes};
         
         case actions.ADD_A_NOTE_SECTION:
-           let notesCopy = JSON.parse(JSON.stringify(state.notes));
+            let notesCopy = JSON.parse(JSON.stringify(state.notes));
 
-           notesCopy[action.payload.topicIndex].subtopics[action.payload.subTopicIndex].content.push(action.payload.content);
-           return {...state, notes: notesCopy};
+            notesCopy[action.payload.topicIndex].subtopics[action.payload.subTopicIndex].content.push(action.payload.content);
+            return {...state, notes: notesCopy};
 
         case actions.UPDATE_A_NOTE_SECTION:
             let newSxnNotes = JSON.parse(JSON.stringify(state.notes));
             newSxnNotes[action.payload.topicIndex].subtopics[action.payload.subTopicIndex].content[action.payload.sectionIndex] = {
                 title: action.payload.title,
                 text: action.payload.text,
-                type: action.payload.type
+                type: action.payload.type,
+                id: action.payload.id
             };
             return {...state, notes: newSxnNotes};
 
         case actions.ADD_A_SUBTOPIC:
+            // This may be the buggy bit? Not sure. New subtopics 'copy' the first one's.
             let newSubtopicNotes = JSON.parse(JSON.stringify(state.notes));
             const newSubtopic = {
                 name: action.payload.newSubtopicName,
-                content: [ { title: `Note Section #1`, text: ``, type: 'notes' } ]
-            }
+                content: [ { title: `Note Section #1`, text: ``, type: 'notes', id: action.payload.id } ]
+            };
+            console.log(`OLD notes: ${JSON.stringify(newSubtopicNotes)}`)
             newSubtopicNotes[action.payload.topicIndex].subtopics.push(newSubtopic);
+            console.log(`NEW notes: ${JSON.stringify(newSubtopicNotes)}`)
             return {...state, notes: newSubtopicNotes};
+        
+        case actions.UPDATE_TOPIC_PARAM:
+            // Need the array of the topic in NOTES, the target to edit (name or description), and the new content
+            let newTopicParamNotes = JSON.parse(JSON.stringify(state.notes));
+            newTopicParamNotes[action.payload.topicIndex][action.payload.editTarget] = action.payload.editContent;
+            return {...state, notes: newTopicParamNotes};
 
         default:
             return state;
@@ -130,7 +141,7 @@ const initialState = {
         font: 'default'
     },
     syllabus: [],
-    notes: [], // array of topics, with subtopics, with content
+    notes: [], // array of topics { name, description, subtopics, resources }, with subtopics { name, content }, with content { title, text, type }
     alert: {type: 'info', message: '', startTime: undefined, duration: 0},
     backupAlerts: []
 }
