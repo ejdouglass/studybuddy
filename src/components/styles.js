@@ -441,9 +441,10 @@ export const Card = styled.div`
 
 export const TopicsContainer = styled(ContentContainer)`
     flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
     align-content: flex-start;
     flex-wrap: wrap;
+    padding-bottom: 2rem;
 `;
 
 export const NotepadToolbar = styled(ContentContainer)`

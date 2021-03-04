@@ -10,6 +10,7 @@ const Notes = () => {
     const [selectedSectionIndex, setSelectedSectionIndex] = useState(undefined);
     const [newTopicName, setNewTopicName] = useState('');
     const [newTopicDesc, setNewTopicDesc] = useState('');
+    const topicNameRef = useRef(null);
     /*
     topic.subtopics format:
     subtopics: [ { name: 'SUBTOPIC_NAME', content: [ {} ] } ],
@@ -61,6 +62,7 @@ const Notes = () => {
             dispatch({type: actions.ADD_A_TOPIC, payload: newTopic});
             setNewTopicName('');
             setNewTopicDesc('');
+            topicNameRef.current.focus();
             dispatch({type: actions.ALERT_USER, payload: {type: 'success', message: `New topic created!`, duration: 5}});
         } else {
             dispatch({type: actions.ALERT_USER, payload: {type: 'error', message: `Please give the new topic a name!`, duration: 10}});
@@ -151,9 +153,9 @@ const Notes = () => {
                     <>
                         <RowContainer full centered>
                             <Form centered row onSubmit={createNewTopic}>
-                                <Input type='text' autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
+                                <Input type='text' ref={topicNameRef} autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
                                 <Input doublewide tight type='text' placeholder={`(new topic description)`} value={newTopicDesc} onChange={(e) => setNewTopicDesc(e.target.value)}></Input>
-                                <Button>Create New Topic!</Button>
+                                <Button bold>Create New Topic!</Button>
                             </Form>
                         </RowContainer>
                         <Title>Select a Topic to Study or Take Notes On</Title>

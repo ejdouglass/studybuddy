@@ -142,8 +142,8 @@ export const Reducer = (state, action) => {
         case actions.UPDATE_A_SUBTOPIC: {
             // Gotta know topicIndex, subtopicIndex, and the new name of this bad boy via payload
             let notesCopy = JSON.parse(JSON.stringify(state.notes));
-            const { payload } = action;
-            notesCopy[payload.topicIndex].subtopics[payload.subtopicIndex].name = payload.newName;
+            const { topicIndex, subtopicIndex, newName } = action.payload;
+            notesCopy[topicIndex].subtopics[subtopicIndex].name = newName;
             return {...state, notes: notesCopy};
         }
 
