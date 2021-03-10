@@ -518,6 +518,7 @@ export const NoteSection = styled.textarea`
     line-height: 1.5;
     resize: none;
     border: none;
+    overflow: hidden;
     font-size: 1.2rem;
     font-family: sans-serif;
     color: ${colors.blackish};

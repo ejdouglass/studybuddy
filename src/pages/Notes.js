@@ -172,7 +172,7 @@ const Notes = () => {
                         <Text>Get started by naming a new Topic to take notes in:</Text>
                         <ColumnContainer half centered>
                             <Form onSubmit={createNewTopic}>
-                                <Input type='text' autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
+                                <Input type='text' ref={topicNameRef} autoFocus={state.notes.length === 0 ? true : false} placeholder={`(new topic name)`} value={newTopicName} onChange={(e) => setNewTopicName(e.target.value)}></Input>
                                 <Input doublewide tight type='text' placeholder={`(new topic description)`} value={newTopicDesc} onChange={(e) => setNewTopicDesc(e.target.value)}></Input>
                                 <Button rightside>Create New Topic!</Button>
                             </Form>
